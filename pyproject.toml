@@ -9,7 +9,7 @@ packages = [{ include = "dace_query" }]
 
 maintainers = ["dace-team <dace-support@unige.ch>"]
 homepage = "https://dace.unige.ch/"
-repository = "https://gitlab.unige.ch/dace/dace-api"
+repository = "https://gitlab.unige.ch/dace-public/dace-api"
 documentation = "https://dace-query.readthedocs.io/en/latest/"
 
 [tool.poetry.dependencies]
