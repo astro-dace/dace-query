@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "dace-query"
+version = "1.0.0"
+description = "The dace-query lets easily query DACE and access public and private data using a simple utility tool."
+authors = ["dace-team <dace-support@unige.ch>"]
+readme = "README.rst"
+license = "GPL-3.0-only"
+packages = [{ include = "dace_query" }]
+
+maintainers = ["dace-team <dace-support@unige.ch>"]
+homepage = "https://dace.unige.ch/"
+repository = "https://gitlab.unige.ch/dace/dace-api"
+documentation = "https://dace-query.readthedocs.io/en/latest/"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+numpy = "^1.23.4"
+astropy = "^5.1.1"
+pandas = "^1.5.1"
+requests = "^2.28.1"
+
+
+[[tool.poetry.source]]
+name = "pypi-test"
+url = "https://test.pypi.org/legacy/"
+default = false
+secondary = false
+
+
+[tool.poetry.group.dev.dependencies]
+sphinx = "^5.3.0"
+pytest = "^7.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
