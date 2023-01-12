@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dace-query"
-version = "1.0.0"
+version = "1.0.1"
 description = "The dace-query lets easily query DACE and access public and private data using a simple utility tool."
 authors = ["dace-team <dace-support@unige.ch>"]
 readme = "README.rst"
