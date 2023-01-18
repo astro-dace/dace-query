@@ -328,6 +328,33 @@ class CheopsClass:
             output_filename=output_filename
         )
 
+    def list_data_product(self,
+                          visit_filepath: str,
+                          output_format: Optional[str] = None) -> Union[dict[str, ndarray], DataFrame, Table, dict]:
+        """
+        List the filenames of all available data products for the specified visit filepath
+
+        :param visit_filepath: The cheops visit filepath
+        :type visit_filepath: str
+        :param output_format: Type of data returns
+        :type output_format: Optional[str]
+        :return: The desired data in the chosen output format
+        :rtype: dict[str, ndarray] or DataFrame or Table or dict
+
+        >>> from dace_query.cheops import Cheops
+        >>> values = Cheops.list_data_product(visit_filepath='cheops/outtray/PR10/PR100018_TG027204_V0200/CH_PR100018_TG027204_TU2020-12-04T04-42-41_SCI_RAW_SubArray_V0200.fits')
+        """
+
+        return self.dace.transform_to_format(
+            self.dace.request_post(
+                api_name=self.__CHEOPS_API,
+                endpoint='download/browse',
+                data=json.dumps({
+                    'file_rootpath': [visit_filepath]
+                })
+            ), output_format=output_format
+        )
+
 
 Cheops: CheopsClass = CheopsClass()
 """

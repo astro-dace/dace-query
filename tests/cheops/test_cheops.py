@@ -157,3 +157,20 @@ def test_cheops_download_file(instance, filepath_root, request):
     )
     assert Path(output_directory, output_filename).exists()
     Path(output_directory, output_filename).unlink(missing_ok=True)
+
+
+@pytest.mark.parametrize('instance, visit_filepath', [
+    pytest.param('anon_dace_instance',
+                 'cheops/outtray/PR31/PR310080_TG000301_V0200/CH_PR310080_TG000301_TU2021-02-12T00-16-22_SCI_RAW_SubArray_V0200.fits',
+                 marks=pytest.mark.xfail),
+    pytest.param('admin_dace_instance',
+                 'cheops/outtray/PR31/PR310080_TG000301_V0200/CH_PR310080_TG000301_TU2021-02-12T00-16-22_SCI_RAW_SubArray_V0200.fits')
+])
+def test_cheops_list_data_products(instance, visit_filepath, request):
+    dace_instance: DaceClass = request.getfixturevalue(instance)
+    instance = CheopsClass(dace_instance=dace_instance)
+
+    results = instance.list_data_product(visit_filepath=visit_filepath, output_format='dict')
+
+    assert results
+    assert 'file' in results

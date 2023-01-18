@@ -40,3 +40,9 @@ instance.download_diagnostic_movie(
 # sky_coord, angle = SkyCoord("22h23m29s", "+32d27m34s", frame='icrs'), Angle('0.045d')
 # values = instance.query_region(sky_coord=sky_coord, angle=angle)
 # print(values)
+
+results = instance.list_data_product(
+    visit_filepath='cheops/outtray/PR10/PR100002_TG016604_V0200/CH_PR100002_TG016604_TU2021-02-12T14-49-28_SCI_RAW_SubArray_V0200.fits'
+)
+
+print(results.keys())
