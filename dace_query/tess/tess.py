@@ -19,7 +19,7 @@ class TessClass:
     The tess class.
     Use to retrieve data from the tess module.
 
-    **A tess instance is already provided, to uses it :**
+    **A tess instance is already provided, to use it :**
 
     >>> from dace_query.tess import Tess
     """

@@ -3,12 +3,12 @@ dace-query
 
 Description
 ***********
-The dace-query lets easily query DACE and access public and private data using a simple utility tool.
+The dace-query package lets easily query DACE and access public and private data using a simple utility tool.
 
 Installation
 ************
 
-The dace-query is available on PyPi and can be installed using `pip <https://pypi.org/project/pip/>`_ or `conda <https://www.anaconda.com>`_ :
+The dace-query package is available on PyPi and can be installed using `pip <https://pypi.org/project/pip/>`_ or `conda <https://www.anaconda.com>`_ :
 
 
 .. code-block:: bash
@@ -29,7 +29,7 @@ The dace-query is available on PyPi and can be installed using `pip <https://pyp
     # Finally, install using anaconda pip
     pip install dace-query
 
-Make sure the API is installed correctly :
+Make sure the package is installed correctly :
 
 .. code-block:: python
 

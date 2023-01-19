@@ -76,8 +76,8 @@ These two filters can be applied to *string* type parameters.
 
 
 
-equal - notEqual
-----------------
+equal - not equal
+-----------------
 
 This filter filters the chosen parameter if it is equal or not to the value sought.
 

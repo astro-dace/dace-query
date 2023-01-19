@@ -1,4 +1,10 @@
-1.0.0
+dev (1.1.0)
+***********
+
+* Cheops module
+    * List data products for a specified visit
+
+1.0.1
 *****
 
 **The first public release of the dace-query package**
