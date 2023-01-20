@@ -2,7 +2,14 @@ dev (1.1.0)
 ***********
 
 * Cheops module
-    * List data products for a specified visit
+    * List data products for a specified visit : ``Cheops.list_data_product()``
+    * Download specific files using exact filenames: ``Cheops.download_files()``
+* Fixes
+    * Duplicated log issue
+    * Download issue (with the accessing results method)
+* Code improvements
+* Enhanced documentation
+
 
 1.0.1
 *****
