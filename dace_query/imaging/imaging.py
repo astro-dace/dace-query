@@ -179,7 +179,7 @@ class ImagingClass:
             filters = {}
 
         imaging_data = self.query_database(filters=filters, output_format='dict')
-        files = imaging_data['file_rootpath']
+        files = imaging_data.get('file_rootpath', [])
         download_response = self.dace.request_post(
             api_name=self.__OBS_API,
             endpoint='download/prepare/imaging',

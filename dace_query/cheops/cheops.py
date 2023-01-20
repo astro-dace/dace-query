@@ -275,10 +275,8 @@ class CheopsClass:
 
         cheops_data = self.query_database(filters=filters, output_format='dict')
 
-        files = []
-        if 'file_rootpath' in cheops_data:
-            files = cheops_data['file_rootpath']
-            
+        files = cheops_data.get('file_rootpath', [])
+
         download_id = self.dace.request_post(
             api_name=self.__CHEOPS_API,
             endpoint='download',

@@ -147,7 +147,8 @@ class SunClass:
             filters = {}
 
         sun_spectroscopy_data = self.query_database(filters=filters, output_format='dict')
-        files = sun_spectroscopy_data['file_rootpath']
+        files = sun_spectroscopy_data.get('file_rootpath', [])
+
         download_response = self.dace.request_post(
             api_name=self.__OBS_API,
             endpoint='download/prepare/sun',
@@ -197,8 +198,6 @@ class SunClass:
             raise NoDataException
 
         files = list(map(lambda file: f'{file}.fits' if not file.endswith('.fits') else file, files))
-
-        # files = [file + '.fits' for file in files if '.fits' not in file]
 
         download_response = self.dace.request_post(
             api_name=self.__OBS_API,
