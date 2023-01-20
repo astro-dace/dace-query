@@ -166,7 +166,7 @@ class SpectroscopyClass:
             filters = {}
 
         spectroscopy_data = self.query_database(filters=filters, output_format='dict')
-        files = spectroscopy_data['file_rootpath']
+        files = spectroscopy_data.get('file_rootpath', [])
         download_response = self.dace.request_post(
             api_name=self.__OBS_API,
             endpoint='download/prepare/spectroscopy',
@@ -198,7 +198,9 @@ class SpectroscopyClass:
         File type available are ['s1d', 's2d', 'ccf', 'bis', 'guidance', 'all']
 
         :param files: The raw files
+        :type files: list[str]
         :param file_type: The type of files to download
+        :type file_type: Optional[str]
         :param output_directory: The directory where files will be saved
         :type output_directory: Optional[str]
         :param output_filename: The filename for the download
