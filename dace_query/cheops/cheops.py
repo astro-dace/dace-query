@@ -10,6 +10,7 @@ from numpy import ndarray
 from pandas import DataFrame
 
 from dace_query import Dace, DaceClass
+from dace_query.dace import NoDataException
 
 CHEOPS_DEFAULT_LIMIT = 10000
 
@@ -277,7 +278,7 @@ class CheopsClass:
         files = []
         if 'file_rootpath' in cheops_data:
             files = cheops_data['file_rootpath']
-
+            
         download_id = self.dace.request_post(
             api_name=self.__CHEOPS_API,
             endpoint='download',
@@ -290,6 +291,52 @@ class CheopsClass:
             api_name=self.__CHEOPS_API,
             obs_type='photometry',
             download_id=download_id['key'],
+            output_directory=output_directory,
+            output_filename=output_filename
+        )
+
+    def download_files(self,
+                       files: list,
+                       file_type: Optional[str] = 'all',
+                       output_directory: Optional[str] = None,
+                       output_filename: Optional[str] = None):
+        """
+        Download reduction products specified in argument for the list of raw specified and save it locally.
+        Note: When using file_type='files', exact data_products filenames are downloaded
+
+        File type available are ['lightcurves', 'images', 'reports', 'full', 'sub', 'all', 'files']
+
+        :param files: The raw files
+        :type files: list[str]
+        :param file_type: The type of files to download
+        :type file_type: Optional[str]
+        :param output_directory: The directory where files will be saved
+        :type output_directory: Optional[str]
+        :param output_filename: The file for the download
+        :type output_filename: Optional[str]
+        :return: None
+
+        >>> from dace_query.cheops import Cheops
+        >>> # Cheops.download_files(files=['cheops/outtray/PR30/PR300024_TG000101_V0101/CH_PR300024_TG000101_TU2020-03-09T14-50-41_SCI_RAW_SubArray_V0101.fits'],file_type='lightcurves',output_directory='/tmp' ,output_filename='cheops.tar.gz')
+        >>> # Cheops.download_files(files=['cheops/outtray/PR30/PR300024_TG000101_V0101/CH_PR300024_TG000101_TU2020-03-09T14-50-41_SCI_RAW_HkCe-SubArray_V0101.fits', 'cheops/outtray/PR30/PR300024_TG000101_V0101/CH_PR300024_TG000101_TU2020-03-09T14-49-35_SCI_RAW_HkCe-FullArray_V0101.fits'], file_type='files', output_directory='/tmp', output_filename='specific_files.tar.gz')
+        """
+
+        if files is None:
+            raise NoDataException
+        files = list(map(lambda file: f'{file}.fits' if not file.endswith('.fits') else file, files))
+        download_response = self.dace.request_post(
+            api_name=self.__CHEOPS_API,
+            endpoint='download',
+            data=json.dumps(
+                {'fileType': file_type, 'files': files}
+            )
+        )
+        if not download_response:
+            return None
+        self.dace.persist_file_on_disk(
+            api_name=self.__CHEOPS_API,
+            obs_type='photometry',
+            download_id=download_response['key'],
             output_directory=output_directory,
             output_filename=output_filename
         )
