@@ -22,7 +22,6 @@ class TargetClass:
 
     >>> from dace_query.target import Target
     """
-    __OBS_API = 'obs-webapp'
 
     def __init__(self, dace_instance: Optional[DaceClass] = None):
         """
@@ -35,6 +34,8 @@ class TargetClass:
         >>> target_instance = TargetClass()
 
         """
+
+        self.__OBS_API = 'obs-webapp'
 
         if dace_instance is None:
             self.dace = Dace

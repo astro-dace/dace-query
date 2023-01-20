@@ -27,7 +27,6 @@ class PopulationClass:
     """Snapshot parameters retrieved by default"""
     SIMULATIONS_DEFAULT_COLUMN = ['total_mass', 'semi_major_axis']
     """Simulation parameters retrieved by default"""
-    __POPULATION_API = 'evo-webapp'
 
     def __init__(self, dace_instance: Optional[DaceClass] = None):
         """
@@ -39,6 +38,7 @@ class PopulationClass:
         >>> from dace_query.population import PopulationClass
         >>> population_instance = PopulationClass()
         """
+        self.__POPULATION_API = 'evo-webapp'
 
         if dace_instance is None:
             self.dace = Dace
