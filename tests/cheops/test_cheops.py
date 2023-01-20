@@ -174,3 +174,59 @@ def test_cheops_list_data_products(instance, visit_filepath, request):
 
     assert results
     assert 'file' in results
+
+
+@pytest.mark.parametrize('instance, files', [
+    pytest.param('anon_dace_instance', [
+        'cheops/outtray/PR31/PR310068_TG000101_V0100/CH_PR310068_TG000101_TU2020-08-20T04-46-31_SCI_RAW_SubArray_V0100.fits'
+    ]),
+    pytest.param('anon_dace_instance', [
+        'cheops/outtray/PR10/PR100020_TG001101_V0200/CH_PR100020_TG001101_TU2020-07-24T01-27-40_SCI_RAW_SubArray_V0200.fits'
+    ],
+                 marks=pytest.mark.xfail),
+    pytest.param('admin_dace_instance', [
+        'cheops/outtray/PR10/PR100020_TG001101_V0200/CH_PR100020_TG001101_TU2020-07-24T01-27-40_SCI_RAW_SubArray_V0200.fits'
+    ])
+])
+def test_cheops_download_files(instance, files, request):
+    dace_instance: DaceClass = request.getfixturevalue(instance)
+    instance = CheopsClass(dace_instance=dace_instance)
+    output_directory = '/tmp'
+    output_filename = 'files.tar.gz'
+    instance.download_files(
+        files=files,
+        file_type='lightcurves',
+        output_directory=output_directory,
+        output_filename=output_filename
+    )
+    assert Path(output_directory, output_filename).exists()
+    Path(output_directory, output_filename).unlink(missing_ok=True)
+
+
+@pytest.mark.parametrize('instance, files', [
+    pytest.param('anon_dace_instance', [
+        'cheops/outtray/PR30/PR300050_TG000101_V0101/CH_PR300050_TG000101_TU2020-03-10T05-05-06_SCI_RAW_HkCe-FullArray_V0101.fits',
+        'cheops/outtray/PR30/PR300050_TG000101_V0101/CH_PR300050_TG000101_TU2020-03-10T05-05-59_SCI_RAW_HkCe-SubArray_V0101.fits'
+    ]),
+    pytest.param('anon_dace_instance', [
+        'cheops/outtray/PR30/PR300049_TG000501_V0100/CH_PR300049_TG000501_TU2020-03-13T20-05-15_SCI_RAW_HkCe-FullArray_V0100.fits',
+        'cheops/outtray/PR30/PR300049_TG000501_V0100/CH_PR300049_TG000501_TU2020-03-13T20-06-20_SCI_RAW_HkCe-SubArray_V0100.fits'
+    ], marks=pytest.mark.xfail),
+    pytest.param('admin_dace_instance', [
+        'cheops/outtray/PR30/PR300049_TG000501_V0100/CH_PR300049_TG000501_TU2020-03-13T20-05-15_SCI_RAW_HkCe-FullArray_V0100.fits',
+        'cheops/outtray/PR30/PR300049_TG000501_V0100/CH_PR300049_TG000501_TU2020-03-13T20-06-20_SCI_RAW_HkCe-SubArray_V0100.fits'
+    ])
+])
+def test_cheops_download_specific_files(instance, files, request):
+    dace_instance: DaceClass = request.getfixturevalue(instance)
+    instance = CheopsClass(dace_instance=dace_instance)
+    output_directory = '/tmp'
+    output_filename = 'specific_files.tar.gz'
+    instance.download_files(
+        files=files,
+        file_type='files',
+        output_directory=output_directory,
+        output_filename=output_filename
+    )
+    assert Path(output_directory, output_filename).exists()
+    Path(output_directory, output_filename).unlink(missing_ok=True)
