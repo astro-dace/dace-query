@@ -38,13 +38,6 @@ class SpectroscopyClass:
         >>> from dace_query.spectroscopy import SpectroscopyClass
         >>> spectroscopy_instance = SpectroscopyClass()
         """
-        # Logging configuration
-        self.log = logging.getLogger("Spectroscopy")
-        self.log.setLevel(logging.INFO)
-        ch = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        self.log.addHandler(ch)
 
         if dace_instance is None:
             self.dace = Dace
@@ -52,6 +45,16 @@ class SpectroscopyClass:
             self.dace = dace_instance
         else:
             raise Exception("Dace instance is not valid")
+
+        # Logger configuration
+        unique_logger_id = self.dace.generate_short_sha1()
+        logger = logging.getLogger(f"spectroscopy-{unique_logger_id}")
+        logger.setLevel(logging.INFO)
+        ch = logging.StreamHandler()
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+        self.log = logger
 
     def query_database(self,
                        limit: Optional[int] = SPECTROSCOPY_DEFAULT_LIMIT,
