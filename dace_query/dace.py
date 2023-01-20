@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import configparser
+import hashlib
 import json
 import logging
 import re
+import time
 import urllib.parse
 from collections import defaultdict
 from functools import partial
@@ -88,8 +90,8 @@ class DaceClass:
         <class 'dace.dace.DaceClass'>
 
         """
-        # Logging configuration
-        logger = logging.getLogger('dace')
+        unique_logger_id = self.generate_short_sha1()
+        logger = logging.getLogger(f'dace-{unique_logger_id}')
         logger.setLevel(logging.INFO)
         ch = logging.StreamHandler()
         ch.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
@@ -373,6 +375,13 @@ class DaceClass:
                 full_vector.append(values[i])
 
         return full_vector
+
+    @staticmethod
+    def generate_short_sha1():
+        """Internal stuff"""
+        hasher = hashlib.new('sha1')
+        hasher.update(str(time.time_ns()).encode('utf-8'))
+        return hasher.hexdigest()[:10]
 
 
 Dace = DaceClass()
