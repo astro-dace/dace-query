@@ -24,9 +24,6 @@ class PhotometryClass:
     >>> from dace_query.photometry import Photometry
     """
     __ACCEPTED_FILE_TYPES = ['s1d', 's2d', 'ccf', 'bis', 'all']
-    __OBS_API = 'obs-webapp'
-    __OBSERVATION_ENDPOINT = __OBS_API + 'observation/'
-    __PHOTOMETRY_ENDPOINT = __OBSERVATION_ENDPOINT + 'photometry/'
 
     def __init__(self, dace_instance: Optional[DaceClass] = None):
         """
@@ -38,6 +35,9 @@ class PhotometryClass:
         >>> from dace_query.photometry import PhotometryClass
         >>> photometry_instance = PhotometryClass()
         """
+        self.__OBS_API = 'obs-webapp'
+        self.__OBSERVATION_ENDPOINT = self.__OBS_API + 'observation/'
+        self.__PHOTOMETRY_ENDPOINT = self.__OBSERVATION_ENDPOINT + 'photometry/'
 
         if dace_instance is None:
             self.dace = Dace

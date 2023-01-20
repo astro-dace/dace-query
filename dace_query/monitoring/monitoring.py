@@ -22,7 +22,6 @@ class MonitoringClass:
     >>> from dace_query.monitoring import Monitoring
 
     """
-    __MONITORING_API = 'monitoring-webapp'
 
     def __init__(self, dace_instance: DaceClass = None):
         """
@@ -34,6 +33,7 @@ class MonitoringClass:
         >>> from dace_query.monitoring import MonitoringClass
         >>> monitoring_instance = MonitoringClass()
         """
+        self.__MONITORING_API = 'monitoring-webapp'
 
         if dace_instance is None:
             self.dace = Dace

@@ -26,7 +26,6 @@ class SpectroscopyClass:
 
     """
     ACCEPTED_FILE_TYPES = ['s1d', 's2d', 'ccf', 'bis', 'all']
-    __OBS_API = 'obs-webapp'
 
     def __init__(self, dace_instance: Optional[DaceClass] = None):
         """
@@ -38,6 +37,7 @@ class SpectroscopyClass:
         >>> from dace_query.spectroscopy import SpectroscopyClass
         >>> spectroscopy_instance = SpectroscopyClass()
         """
+        self.__OBS_API = 'obs-webapp'
 
         if dace_instance is None:
             self.dace = Dace

@@ -36,7 +36,6 @@ class CheopsClass:
         >>> cheops_instance = CheopsClass()
 
         """
-        # Logging configuration
         self.__CHEOPS_API = 'cheops-webapp'
 
         if dace_instance is None:

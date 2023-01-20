@@ -35,7 +35,6 @@ class CatalogClass:
         >>> catalog_instance = CatalogClass()
 
         """
-        # Logging configuration
 
         self.__OBSERVATION_API = 'obs-webapp'
 
