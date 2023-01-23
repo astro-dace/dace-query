@@ -17,7 +17,6 @@ To do so, it is necessary to check the following parameters :
 
 **Here is an example filtering bad quality data to keep only the good ones :**
 
-
 .. code-block:: python
 
     from dace_query.spectroscopy import Spectroscopy
@@ -41,3 +40,64 @@ To do so, it is necessary to check the following parameters :
     filtered_data = {}
     for parameter, values in result.items():
         filtered_data[parameter] = values[condition]
+
+Download non usual data products from a CHEOPS visit
+****************************************************
+
+On the `DACE website <https://dace.unige.ch>`_, several data products per visit can be downloaded, such as light curves, images or many other types of files already defined.
+
+But it is also possible for each of the cheops visits to **list all the data products**, to **select some non common** (like the Attitude, HkCentroid, ...) and then to **download them**.
+
+With the dace-query package, this last one can be achieved thanks to the combination of different functions :
+
+* ``Cheops.list_data_product(visit_filepath=...)``
+* ``Cheops.download_files(file_type='files, files=...')``
+* and some regular expressions using ``import re``
+
+**Here is an example to download the "attitude" product files of a CHEOPS visit for the star HD88111 :**
+
+.. code-block:: python
+
+    import re
+    from pathlib import Path
+    from dace_query.cheops import Cheops
+
+    # Retrieve one cheops visit for the target HD88111
+    cheops_visits = Cheops.query_database(
+        filters={
+            'obj_id_catname': {
+                'equal': ['HD88111']
+            }
+        },
+        limit=1,
+        output_format='dict')
+
+    for visit in cheops_visits.get('file_rootpath', []):
+
+        # Get all data products available for the raw file specified (=visit)
+        visit_products = Cheops.list_data_product(
+            visit_filepath=str(visit),
+            output_format='dict'
+        )
+
+        # ... check if there are data products
+        if (not visit_products) and visit_products.get('file', None):
+            continue  # pass loop # log...
+
+
+        # Get files containing "Attitude" in their name using regex
+        files = [product for product in visit_products['file'] if
+                re.match('.*Attitude.*', Path(product).name, re.IGNORECASE)]
+
+        # ... check if there are files matching the regex
+        if not files:
+            continue  # pass loop # log...
+
+
+        # Download the matched files
+        Cheops.download_files(
+            files=files,
+            file_type='files',
+            output_directory='/tmp',
+            output_filename=f'{Path(visit).parent.name}.tar.gz'
+        )
