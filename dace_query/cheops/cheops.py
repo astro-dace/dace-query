@@ -303,9 +303,10 @@ class CheopsClass:
                        output_filename: Optional[str] = None):
         """
         Download reduction products specified in argument for the list of raw specified and save it locally.
-        Note: When using file_type='files', exact data_products filenames are downloaded
 
-        File type available are ['lightcurves', 'images', 'reports', 'full', 'sub', 'all', 'files']
+        File type available are ['lightcurves', 'images', 'reports', 'full', 'sub', 'all', 'files'].
+
+        **Note:** When using ``file_type='files'``, it is necessary to indicate the **exact filename** of each data product that will be downloaded (See :doc:`usage_examples`).
 
         :param files: The raw files
         :type files: list[str]
@@ -380,7 +381,7 @@ class CheopsClass:
                           visit_filepath: str,
                           output_format: Optional[str] = None) -> Union[dict[str, ndarray], DataFrame, Table, dict]:
         """
-        List the filenames of all available data products for the specified visit filepath
+        List the filenames of all available data products for the specified visit filepath.
 
         :param visit_filepath: The cheops visit filepath
         :type visit_filepath: str

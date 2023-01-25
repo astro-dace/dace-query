@@ -41,8 +41,8 @@ To do so, it is necessary to check the following parameters :
     for parameter, values in result.items():
         filtered_data[parameter] = values[condition]
 
-Download non usual data products from a CHEOPS visit
-****************************************************
+Download non common data products from a CHEOPS visit
+******************************************************
 
 On the `DACE website <https://dace.unige.ch>`_, several data products per visit can be downloaded, such as light curves, images or many other types of files already defined.
 

@@ -36,3 +36,6 @@ exclude_patterns = []
 
 html_theme = 'alabaster'
 html_static_path = ['_static']
+
+# -- Option for autosectionlabel ---------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/autosectionlabel.html
