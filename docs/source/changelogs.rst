@@ -1,5 +1,5 @@
-dev (1.1.0)
-***********
+1.1.0
+*****
 
 * Cheops module
     * List data products for a specified visit : ``Cheops.list_data_product()``
