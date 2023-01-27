@@ -66,6 +66,11 @@ These two filters can be applied to *string* type parameters.
     }
     values = Exoplanet.query_database(filters=filters, limit=10)
 
+
+**Example :** *It returns planets that contain "HD" in their name.*
+
+.. code-block:: python
+
     # contains
     filters: dict = {
         'obj_id_catname': {
@@ -83,7 +88,7 @@ This filter filters the chosen parameter if it is equal or not to the value soug
 
 These two filters can be applied to *string*, *float* and *int* type parameters.
 
-**Example :** *It returns planets with names equal to "Kepler-444 A e" and "Gliese 433 c".*
+**Example :** *It returns planets with names not equal to "Kepler-444 A e" and "Gliese 433 c".*
 
 .. code-block:: python
 
@@ -96,6 +101,11 @@ These two filters can be applied to *string*, *float* and *int* type parameters.
         }
     }
     values = Exoplanet.query_database(filters=filters, limit=10)
+
+
+**Example :** *It returns planets with names equal to "Kepler-444 A e" and "Gliese 433 c".*
+
+.. code-block::python
 
     # equal
     filters: dict = {
@@ -119,7 +129,7 @@ This filter can be applied to *string* and *boolean* type parameters.
 
     from dace_query.exoplanet import Exoplanet
     filters: dict = {
-    'pub_ads_link': {
+        'pub_ads_link': {
             'empty': False
         }
     }

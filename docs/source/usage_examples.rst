@@ -51,7 +51,7 @@ But it is also possible for each of the cheops visits to **list all the data pro
 With the dace-query package, this last one can be achieved thanks to the combination of different functions :
 
 * ``Cheops.list_data_product(visit_filepath=...)``
-* ``Cheops.download_files(file_type='files, files=...')``
+* ``Cheops.download_files(file_type='files', files=...)``
 * and some regular expressions using ``import re``
 
 **Here is an example to download the "attitude" product files of a CHEOPS visit for the star HD88111 :**
