@@ -71,6 +71,8 @@ These two filters can be applied to *string* type parameters.
 
 .. code-block:: python
 
+    from dace_query.exoplanet import Exoplanet
+
     # contains
     filters: dict = {
         'obj_id_catname': {
@@ -78,7 +80,6 @@ These two filters can be applied to *string* type parameters.
         }
     }
     values = Exoplanet.query_database(filters=filters, limit=10)
-
 
 
 equal - not equal
@@ -105,7 +106,9 @@ These two filters can be applied to *string*, *float* and *int* type parameters.
 
 **Example :** *It returns planets with names equal to "Kepler-444 A e" and "Gliese 433 c".*
 
-.. code-block::python
+.. code-block:: python
+
+    from dace_query.exoplanet import Exoplanet
 
     # equal
     filters: dict = {
@@ -128,6 +131,8 @@ This filter can be applied to *string* and *boolean* type parameters.
 .. code-block:: python
 
     from dace_query.exoplanet import Exoplanet
+
+    # empty
     filters: dict = {
         'pub_ads_link': {
             'empty': False
@@ -148,6 +153,8 @@ This filter can be applied to *float* and *int* type parameters.
 .. code-block:: python
 
     from dace_query.exoplanet import Exoplanet
+
+    # min-max
     filters: dict = {
         'obj_phys_mass_mjup': {
             'min': 0.01,
@@ -169,6 +176,8 @@ This filter can be applied to *boolean* type parameters.
 .. code-block:: python
 
     from dace_query.spectroscopy import Spectroscopy
+
+    # is
     filters: dict = {
         'db_spectrum_available': {
             'is': True
