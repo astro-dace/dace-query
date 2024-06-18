@@ -16,18 +16,22 @@ The dace-query package is available on PyPi and can be installed using `pip <htt
     # Install using pip
     pip install dace-query
 
+    # Make sure you have the latest version of the DACE API: (version 1.1.0)
+    pip show dace-query
+    
     # Update using pip
     pip install dace-query --upgrade
 
 .. code-block:: bash
 
-    # Install using conda
-    # First, create a conda environment
-    conda create -n <env_name> python=3.9 # python version equal or upper than 3.9
-    # Second, activate the environment
-    conda activate <env_name>
-    # Finally, install using anaconda pip
-    pip install dace-query
+    # Using conda
+    conda install -c conda-forge dace-query
+
+    # Make sure you have the latest version of the DACE API: (version 1.1.0)
+    conda list dace-query
+
+    # Upgrade de DACE APIs
+    conda update dace-query
 
 Make sure the package is installed correctly :
 
