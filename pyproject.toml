@@ -14,22 +14,21 @@ documentation = "https://dace-query.readthedocs.io/en/latest/"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-numpy = "^1.23.4"
-astropy = "^5.1.1"
-pandas = "^1.5.1"
+numpy = ">=1.23.4"
+astropy = ">=5.1.1"
+pandas = ">=2.0.0"
 requests = "^2.28.1"
 
 
-[[tool.poetry.source]]
-name = "pypi-test"
-url = "https://test.pypi.org/legacy/"
-default = false
-secondary = false
+# [[tool.poetry.source]]
+# name = "pypi-test"
+# url = "https://test.pypi.org/legacy/"
+# priority = "primary"
 
 
 [tool.poetry.group.dev.dependencies]
 sphinx = "^5.3.0"
-pytest = "^7.2.0"
+pytest = ">=7.2.0"
 
 [build-system]
 requires = ["poetry-core"]
