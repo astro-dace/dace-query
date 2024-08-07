@@ -69,16 +69,23 @@ class AstrometryClass:
         identifier, or with a Gaia DR3 identifier. Returns an error if both or none are given.
 
         :param hip_id: Hipparcos identifier
+        :type hip_id: int
         :param gaia_id: Gaia DR3 identifier
-        # :param limit: the max number of rows to retrieve
-        # :param filters: A dict to apply filters on columns (see example below)
-        # :param sort: A dict describing the sorting results (see example below)
+        :type gaia_id: int
         :param output_format: (optional) the format you want for result data : numpy, pandas, astropy_table (default (None) dict)
-        :return: A dict containing lists of values
+        :type output_format: str
+        :return: The desired data in the chosen output format
+        :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
         .. code-block:: python
 
-            # ToDo: Complete documentation
+            from dace.astrometry import Astrometry
+
+            # Query the Hipparcos database with a Hipparcos identifier
+            Astrometry.query_hipparcos_database(hip_id=1000, output_format='pandas')
+
+            # Query the Hipparcos database with a Gaia DR3 identifier
+            Astrometry.query_hipparcos_database(gaia_id=2361372542600289664, output_format='pandas')
         """
         if not hip_id and not gaia_id:
             raise ValueError("Please provide either a HIP id or a Gaia DR3 id.")
@@ -108,18 +115,25 @@ class AstrometryClass:
         self, hip_id: int = None, gaia_id: int = None, output_format: str = None
     ):
         """
-        Get the timeseries from the Hipparcos Intermediate Astrometric Data.
+        Get the timeseries from the Hipparcos Intermediate Astrometric Data (IAD). Can be queried either with an Hipparcos
+        identifier, or with a Gaia DR3 identifier. Returns an error if both or none are given.
+
+        All available formats are defined in this section (see :doc:`output_format`).
 
         :param hip_id: Hipparcos identifier
+        :type hip_id: int
         :param gaia_id: Gaia DR3 identifier
+        :type gaia_id: int
         :param output_format: (optional) the format you want for result data : numpy, pandas, astropy_table (default (None) dict)
-        :return: a dict containing astrometry timeseries vectors
+        :type output_format: str
+        :return: The desired data in the chosen output format
+        :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
         .. code-block:: python
 
             from dace.astrometry import Astrometry
 
-            # TODO: Complete documentation
+            Astrometry.get_hipparcos_timeseries(hip_id=1000, output_format='pandas')
 
         """
 
