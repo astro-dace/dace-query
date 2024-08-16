@@ -121,6 +121,126 @@ class AstrometryClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
+        Column descriptions
+        -------------------
+
+        - **hip** (*-*):
+        Hipparcos identifier.
+
+        - **mce** (*-*):
+        Main-catalogue entry.
+
+        - **nres** (*-*):
+        Number of residual records.
+
+        - **nc** (*-*):
+        Number of components.
+
+        - **isol_n** (*-*):
+        Solution type.
+
+        - **sce** (*-*):
+        Supplement-catalogue entry.
+
+        - **f2** (*-*):
+        Goodness of fit.
+
+        - **f1** (*-*):
+        Percentage of rejected observations.
+
+        - **hp** (*mag*):
+        Hp magnitude.
+
+        - **bmv** (*mag*):
+        B-V colour index.
+
+        - **varann** (*-*):
+        Reference to variability annex.
+
+        - **nob** (*-*):
+        Number of observations.
+
+        - **nr** (*-*):
+        Number of rejected observations.
+
+        - **radeg** (*deg.*):
+        Right Ascension.
+
+        - **dedeg** (*deg.*):
+        Declination.
+
+        - **plx** (*mas*):
+        Parallax.
+
+        - **pm_ra** (*mas/yr*):
+        Proper motion in Right Ascension.
+
+        - **pm_de** (*mas/yr*):
+        Proper motion in Declination.
+
+        - **e_ra** (*mas*):
+        Formal error on RAdeg.
+
+        - **e_de** (*mas*):
+        Formal error on DEdeg.
+
+        - **e_plx** (*mas*):
+        Formal error on Plx.
+
+        - **e_pmra** (*mas/yr*):
+        Formal error on pmRA.
+
+        - **e_pmde** (*mas/yr*):
+        Formal error on pmDE.
+
+        - **dpmra** (*mas/yr²*):
+        Acceleration in Right Ascension (7p, 9p).
+
+        - **dpmde** (*mas/yr²*):
+        Acceleration in Declination (7p, 9p).
+
+        - **e_dpmra** (*mas/yr²*):
+        Formal error on dpmRA (7p, 9p).
+
+        - **e_dpmde** (*mas/yr²*):
+        Formal error on dpmDE (7p, 9p).
+
+        - **ddpmra** (*mas/yr³*):
+        Acceleration change in Right Ascension (9p).
+
+        - **ddpmde** (*mas/yr³*):
+        Acceleration change in Declination (9p).
+
+        - **e_ddpmra** (*mas/yr³*):
+        Formal error on ddpmRA (9p).
+
+        - **e_ddpmde** (*mas/yr³*):
+        Formal error on ddpmDE (9p).
+
+        - **upsra** (*mas*):
+        VIM in Right Ascension (VIM).
+
+        - **upsde** (*mas*):
+        VIM in Declination (VIM).
+
+        - **e_upsra** (*mas*):
+        Formal error on upsRA (VIM).
+
+        - **e_upsde** (*mas*):
+        Formal error on upsDE (VIM).
+
+        - **var** (*mas*):
+        Cosmic dispersion added (stochastic).
+
+        - **gaia_gaiadr3_id** (*-*):
+        Gaia DR3 ID as matched by Gaia.
+
+        - **simbad_gaiadr3_id** (*-*):
+        Gaia DR3 ID as matched by SIMBAD.
+
+        - **gaiadr3_id_conflict** (*-*):
+        Indicates if there is a conflict in Gaia DR3 ID between sources.
+
         .. code-block:: python
 
             from dace.astrometry import Astrometry
@@ -163,6 +283,45 @@ class AstrometryClass:
         :type output_format: str
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
+
+        Column descriptions
+        -------------------
+
+        - **IORB** (*-*):
+        Orbit number.
+
+        - **EPOCH** (*years*):
+        Observation epoch, given as Year - 1991.25.
+
+        - **PARF** (*-*):
+        Parallax factor.
+
+        - **CPSI** (*-*):
+        Cosine of Psi.
+
+        - **SPSI** (*-*):
+        Sine of Psi.
+
+        - **RES** (*mas*):
+        Abscissa residual.
+
+        - **SRES** (*mas*):
+        Formal error on abscissa residual.
+
+        - **HIP** (*-*):
+        Hipparcos identifier.
+
+        - **T_BJD** (*days*):
+        Epoch in Barycentric Julian Date (BJD).
+
+        - **S_MAS** (*mas*):
+        Absolute astrometric signal, RES + fitted model.
+
+        - **CTH** (*-*):
+        Cosine of the theta angle, following Gaia convention.
+
+        - **STH** (*-*):
+        Sine of the theta angle, following Gaia convention.
 
         .. code-block:: python
 
