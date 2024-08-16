@@ -110,14 +110,10 @@ class AstrometryClass:
         basic information about a targets and its solution. Can be queried either with an Hipparcos
         identifier, or with a Gaia DR3 identifier. Returns an error if both or none are given.
 
-        :param id: Identifier of the target, either a HIP id or a Gaia DR3 id
+        :param id: Hipparcos or Gaia DR3 identifier
         :type id: str
-        :param output_format: Type of data returns
+        :param output_format: The format you want for the result data
         :type output_format: Optional[str]
-        :return: The desired data in the chosen output format
-        :rtype: dict[str, ndarray] or DataFrame or Table or dict
-        :param output_format: The format you want for result data : numpy, pandas, astropy_table (default (None) dict)
-        :type output_format: str
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
@@ -241,6 +237,9 @@ class AstrometryClass:
         - **gaiadr3_id_conflict** (*-*):
         Indicates if there is a conflict in Gaia DR3 ID between sources.
 
+        Example
+        -------
+
         .. code-block:: python
 
             from dace.astrometry import Astrometry
@@ -275,12 +274,10 @@ class AstrometryClass:
 
         All available formats are defined in this section (see :doc:`output_format`).
 
-        :param hip_id: Hipparcos identifier
-        :type hip_id: int
-        :param gaia_id: Gaia DR3 identifier
-        :type gaia_id: int
-        :param output_format: (optional) the format you want for result data : numpy, pandas, astropy_table (default (None) dict)
-        :type output_format: str
+        :param id: Hipparcos or Gaia DR3 identifier
+        :type id: str
+        :param output_format: The format you want for the result data
+        :type output_format: Optional[str]
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
@@ -323,11 +320,14 @@ class AstrometryClass:
         - **STH** (*-*):
         Sine of the theta angle, following Gaia convention.
 
+        Example
+        -------
+
         .. code-block:: python
 
             from dace.astrometry import Astrometry
 
-            Astrometry.get_hipparcos_timeseries(hip_id=1000, output_format='pandas')
+            Astrometry.get_hipparcos_timeseries("HIP 1000", output_format='pandas')
 
         """
 
