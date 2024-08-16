@@ -1,3 +1,11 @@
+1.2.0
+*****
+
+* Mew Hipparcos data in the Astrometry module
+    * Query the Hipparcos catalog for a specific target : ``Astrometry.query_hipparcos_database()``
+    * Query the Hipparcos Intermediate Astrometric Data (IAD) for a specific target : ``Astrometry.get_hipparcos_timeseries()``
+* Updated the tests that were failing due to previous updates in the databases
+
 1.1.0
 *****
 

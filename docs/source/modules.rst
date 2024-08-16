@@ -1,5 +1,5 @@
-dace_query
-==========
+API Reference
+=============
 
 .. toctree::
    :maxdepth: 4
