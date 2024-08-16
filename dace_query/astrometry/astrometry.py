@@ -108,7 +108,7 @@ class AstrometryClass:
         """
         Query hipparcos database to retrieve data from the main hipparcos catalog with the
         basic information about a targets and its solution. Can be queried either with an Hipparcos
-        identifier, or with a Gaia DR3 identifier. Returns an error if both or none are given.
+        identifier, or with a Gaia DR3 identifier.
 
         :param id: Hipparcos or Gaia DR3 identifier
         :type id: str
@@ -270,7 +270,7 @@ class AstrometryClass:
     def get_hipparcos_timeseries(self, id: str, output_format: str = None):
         """
         Get the timeseries from the Hipparcos Intermediate Astrometric Data (IAD). Can be queried either with an Hipparcos
-        identifier, or with a Gaia DR3 identifier. Returns an error if both or none are given.
+        identifier, or with a Gaia DR3 identifier.
 
         All available formats are defined in this section (see :doc:`output_format`).
 
