@@ -1,35 +1,29 @@
-[tool.poetry]
+[build-system]
+requires = ["setuptools>=61.0", "sphinx>=5.3.0", "pytest>=7.2.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
 name = "dace-query"
 version = "1.2.0"
 description = "The dace-query lets easily query DACE and access public and private data using a simple utility tool."
-authors = ["dace-team <dace-support@unige.ch>"]
+authors = [{ name = "dace-team", email = "dace-support@unige.ch" }]
+maintainers = [{ name = "dace-team", email = "dace-support@unige.ch" }]
 readme = "README.rst"
-license = "GPL-3.0-only"
-packages = [{ include = "dace_query" }]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Operating System :: OS Independent",
+]
+requires-python = ">=3.8"
+dependencies = [
+  "numpy>=1.23.4",
+  "astropy>=5.1.1",
+  "pandas>=2.0.0",
+  "requests>=2.28.1",
+]
 
-maintainers = ["dace-team <dace-support@unige.ch>"]
-homepage = "https://dace.unige.ch/"
-repository = "https://gitlab.unige.ch/dace-public/dace-api"
-documentation = "https://dace-query.readthedocs.io/en/latest/"
-
-[tool.poetry.dependencies]
-python = "^3.8"
-numpy = ">=1.23.4"
-astropy = ">=5.1.1"
-pandas = ">=2.0.0"
-requests = "^2.28.1"
-
-
-# [[tool.poetry.source]]
-# name = "pypi-test"
-# url = "https://test.pypi.org/legacy/"
-# priority = "primary"
-
-
-[tool.poetry.group.dev.dependencies]
-sphinx = "^5.3.0"
-pytest = ">=7.2.0"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[project.urls]
+Homepage = "https://dace.unige.ch/"
+Repository = "https://gitlab.unige.ch/dace-public/dace-api"
+Issues = "https://gitlab.unige.ch/dace-public/dace-api/-/issues"
+Documentation = "https://dace-query.readthedocs.io/en/latest/"
