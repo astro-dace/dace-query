@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import json
 import logging
-import re
+
+# import re
 from typing import Optional, Union
 
 from astropy.table import Table
+from astroquery.simbad import Simbad
 from numpy import ndarray
 from pandas import DataFrame
 
@@ -58,51 +60,97 @@ class AstrometryClass:
         logger.addHandler(ch)
         self.log = logger
 
-    def _check_id(self, id: str) -> str:
+    # def _check_id(self, id: str) -> str:
+    #     """
+    #     Check if the given id is valid.
+
+    #     :param id: The id to check
+    #     :type id: str
+    #     :return: catalog, id_number. The catalog name (HIP or GAIA DR3) and the id number.
+    #     :rtype: (str, str)
+    #     """
+    #     # Validate the input type
+    #     if not isinstance(id, str):
+    #         raise TypeError("The identifier must be a string.")
+
+    #     # Normalize the input
+    #     id = id.strip().upper()
+    #     id = re.sub(r"\s+", " ", id)  # Replace multiple spaces with a single space
+
+    #     # Identify the catalog and validate format
+    #     catalog = None
+    #     id_number = None
+
+    #     if id.startswith("HIP"):
+    #         catalog = "HIP"
+    #         id_number = id[3:].strip()  # Extract number after "HIP"
+    #         if not id_number.isdigit() or len(id_number) > 6:
+    #             raise ValueError("Invalid HIP identifier format.")
+    #     elif id.startswith("GAIA DR3"):
+    #         catalog = "GAIA DR3"
+    #         id_number = id[8:].strip()  # Extract number after "GAIA DR3"
+    #         if not id_number.isdigit() or len(id_number) <= 6:
+    #             raise ValueError("Invalid Gaia DR3 identifier format.")
+    #     else:
+    #         # Assume it's a number only, determine catalog based on length
+    #         id_number = id.strip()
+    #         if id_number.isdigit():
+    #             if len(id_number) <= 6:
+    #                 catalog = "HIP"
+    #             else:
+    #                 catalog = "GAIA DR3"
+    #         else:
+    #             raise ValueError(
+    #                 "Identifier must be a valid number or a recognized catalog prefix (HIP, Gaia DR3)."
+    #             )
+
+    #     return catalog, id_number
+
+    def _simbad_id_check(self, id):
         """
-        Check if the given id is valid.
+        Queries Simbad to retrieve either its HIP or Gaia DR3 id. It return the name of the catalog
+        (HIP or GAIA DR3) and the id number of that catalog.
+        If the input is a HIP id, it will return the same id.
+        If the input is a Gaia DR3 id, it will return the same.
+
+        It will always prefer the HIP id over the Gaia DR3 id. Meaning that if the input is from
+        a different catalog, it will first search for a HIP id, if not available then it takes the
+        Gaia DR3 id.
 
         :param id: The id to check
         :type id: str
-        :return: The id if it is valid
-        :rtype: str
+        :return: catalog, id_number. The catalog name (HIP or GAIA DR3) and the id number.
+        :rtype: (str, str)
         """
         # Validate the input type
         if not isinstance(id, str):
             raise TypeError("The identifier must be a string.")
 
-        # Normalize the input
-        id = id.strip().upper()
-        id = re.sub(r"\s+", " ", id)  # Replace multiple spaces with a single space
+        # Query SIMBAD
+        custom_simbad = Simbad()
+        custom_simbad.add_votable_fields("ids")
+        result = custom_simbad.query_object(id)
 
-        # Identify the catalog and validate format
-        catalog = None
-        id_number = None
+        if result is None:
+            raise ValueError(f"No object found for the given identifier: {id}")
 
-        if id.startswith("HIP"):
-            catalog = "HIP"
-            id_number = id[3:].strip()  # Extract number after "HIP"
-            if not id_number.isdigit() or len(id_number) > 6:
-                raise ValueError("Invalid HIP identifier format.")
-        elif id.startswith("GAIA DR3"):
-            catalog = "GAIA DR3"
-            id_number = id[8:].strip()  # Extract number after "GAIA DR3"
-            if not id_number.isdigit() or len(id_number) <= 6:
-                raise ValueError("Invalid Gaia DR3 identifier format.")
-        else:
-            # Assume it's a number only, determine catalog based on length
-            id_number = id.strip()
-            if id_number.isdigit():
-                if len(id_number) <= 6:
-                    catalog = "HIP"
-                else:
-                    catalog = "GAIA DR3"
-            else:
-                raise ValueError(
-                    "Identifier must be a valid number or a recognized catalog prefix (HIP, Gaia DR3)."
-                )
+        # Extract all identifiers
+        all_ids = result["IDS"][0].split("|")
 
-        return catalog, id_number
+        # Check for HIP id
+        hip_ids = [i for i in all_ids if i.startswith("HIP ")]
+        if hip_ids:
+            return "HIP", hip_ids[0].split()[1]
+
+        # Check for Gaia DR3 id
+        gaia_ids = [i for i in all_ids if i.startswith("Gaia DR3 ")]
+        if gaia_ids:
+            return "GAIA DR3", gaia_ids[0].split()[2]
+
+        # If neither HIP nor Gaia DR3 id is found
+        raise ValueError(
+            f"No HIP or Gaia DR3 identifier found for the given object: {id}"
+        )
 
     def query_hipparcos_database(self, id: str, output_format: str = None):
         """
@@ -251,7 +299,10 @@ class AstrometryClass:
             Astrometry.query_hipparcos_database('Gaia DR3 2361372542600289664', output_format='pandas')
         """
         # Validate the input type
-        catalog, id_number = self._check_id(id)
+        # catalog, id_number = self._check_id(id)
+
+        # EXPERIMENTAL
+        catalog, id_number = self._simbad_id_check(id)
 
         # Query the backend
         if catalog == "HIP":
@@ -332,7 +383,8 @@ class AstrometryClass:
         """
 
         # Validate the input type
-        catalog, id_number = self._check_id(id)
+        # catalog, id_number = self._check_id(id)
+        catalog, id_number = self._simbad_id_check(id)
 
         # Query the backend
         if catalog == "HIP":
