@@ -21,9 +21,11 @@ class AstrometryClass:
     The astrometry class.
     Use to retrieve data from the astrometry module.
 
-    **An astrometry instance is already provided, to use it :**
+    An astrometry instance is already provided, to use it:
 
-    >>> from dace_query.astrometry import Astrometry
+    .. code-block:: python
+
+        from dace_query.astrometry import Astrometry
 
     """
 
@@ -34,8 +36,10 @@ class AstrometryClass:
         :param dace_instance: A dace object
         :type dace_instance: Optional[DaceClass]
 
-        >>> from dace_query.astrometry import AstrometryClass
-        >>> astrometry_instance = AstrometryClass()
+        .. code-block:: python
+
+            from dace_query.astrometry import AstrometryClass
+            astrometry_instance = AstrometryClass()
 
         """
 
@@ -155,10 +159,9 @@ class AstrometryClass:
     def query_hipparcos_database(self, id: str, output_format: str = None):
         """
         Query hipparcos database to retrieve data from the main hipparcos catalog with the
-        basic information about a targets and its solution. Can be queried either with an Hipparcos
-        identifier, or with a Gaia DR3 identifier.
+        basic information about a target and its solution.
 
-        :param id: Hipparcos or Gaia DR3 identifier
+        :param id: Target name or identifier
         :type id: str
         :param output_format: The format you want for the result data
         :type output_format: Optional[str]
@@ -168,122 +171,83 @@ class AstrometryClass:
         Column descriptions
         -------------------
 
-        - **hip** (*-*):
-        Hipparcos identifier.
+        - **hip** (*-*): Hipparcos identifier.
 
-        - **mce** (*-*):
-        Main-catalogue entry.
+        - **mce** (*-*): Main-catalogue entry.
 
-        - **nres** (*-*):
-        Number of residual records.
+        - **nres** (*-*): Number of residual records.
 
-        - **nc** (*-*):
-        Number of components.
+        - **nc** (*-*): Number of components.
 
-        - **isol_n** (*-*):
-        Solution type.
+        - **isol_n** (*-*): Solution type.
 
-        - **sce** (*-*):
-        Supplement-catalogue entry.
+        - **sce** (*-*): Supplement-catalogue entry.
 
-        - **f2** (*-*):
-        Goodness of fit.
+        - **f2** (*-*): Goodness of fit.
 
-        - **f1** (*-*):
-        Percentage of rejected observations.
+        - **f1** (*-*): Percentage of rejected observations.
 
-        - **hp** (*mag*):
-        Hp magnitude.
+        - **hp** (*mag*): Hp magnitude.
 
-        - **bmv** (*mag*):
-        B-V colour index.
+        - **bmv** (*mag*): B-V colour index.
 
-        - **varann** (*-*):
-        Reference to variability annex.
+        - **varann** (*-*): Reference to variability annex.
 
-        - **nob** (*-*):
-        Number of observations.
+        - **nob** (*-*): Number of observations.
 
-        - **nr** (*-*):
-        Number of rejected observations.
+        - **nr** (*-*): Number of rejected observations.
 
-        - **radeg** (*deg.*):
-        Right Ascension.
+        - **radeg** (*deg.*): Right Ascension.
 
-        - **dedeg** (*deg.*):
-        Declination.
+        - **dedeg** (*deg.*): Declination.
 
-        - **plx** (*mas*):
-        Parallax.
+        - **plx** (*mas*): Parallax.
 
-        - **pm_ra** (*mas/yr*):
-        Proper motion in Right Ascension.
+        - **pm_ra** (*mas/yr*): Proper motion in Right Ascension.
 
-        - **pm_de** (*mas/yr*):
-        Proper motion in Declination.
+        - **pm_de** (*mas/yr*): Proper motion in Declination.
 
-        - **e_ra** (*mas*):
-        Formal error on RAdeg.
+        - **e_ra** (*mas*): Formal error on RAdeg.
 
-        - **e_de** (*mas*):
-        Formal error on DEdeg.
+        - **e_de** (*mas*): Formal error on DEdeg.
 
-        - **e_plx** (*mas*):
-        Formal error on Plx.
+        - **e_plx** (*mas*): Formal error on Plx.
 
-        - **e_pmra** (*mas/yr*):
-        Formal error on pmRA.
+        - **e_pmra** (*mas/yr*): Formal error on pmRA.
 
-        - **e_pmde** (*mas/yr*):
-        Formal error on pmDE.
+        - **e_pmde** (*mas/yr*): Formal error on pmDE.
 
-        - **dpmra** (*mas/yr²*):
-        Acceleration in Right Ascension (7p, 9p).
+        - **dpmra** (*mas/yr²*): Acceleration in Right Ascension (7p, 9p).
 
-        - **dpmde** (*mas/yr²*):
-        Acceleration in Declination (7p, 9p).
+        - **dpmde** (*mas/yr²*): Acceleration in Declination (7p, 9p).
 
-        - **e_dpmra** (*mas/yr²*):
-        Formal error on dpmRA (7p, 9p).
+        - **e_dpmra** (*mas/yr²*): Formal error on dpmRA (7p, 9p).
 
-        - **e_dpmde** (*mas/yr²*):
-        Formal error on dpmDE (7p, 9p).
+        - **e_dpmde** (*mas/yr²*): Formal error on dpmDE (7p, 9p).
 
-        - **ddpmra** (*mas/yr³*):
-        Acceleration change in Right Ascension (9p).
+        - **ddpmra** (*mas/yr³*): Acceleration change in Right Ascension (9p).
 
-        - **ddpmde** (*mas/yr³*):
-        Acceleration change in Declination (9p).
+        - **ddpmde** (*mas/yr³*): Acceleration change in Declination (9p).
 
-        - **e_ddpmra** (*mas/yr³*):
-        Formal error on ddpmRA (9p).
+        - **e_ddpmra** (*mas/yr³*): Formal error on ddpmRA (9p).
 
-        - **e_ddpmde** (*mas/yr³*):
-        Formal error on ddpmDE (9p).
+        - **e_ddpmde** (*mas/yr³*): Formal error on ddpmDE (9p).
 
-        - **upsra** (*mas*):
-        VIM in Right Ascension (VIM).
+        - **upsra** (*mas*): VIM in Right Ascension (VIM).
 
-        - **upsde** (*mas*):
-        VIM in Declination (VIM).
+        - **upsde** (*mas*): VIM in Declination (VIM).
 
-        - **e_upsra** (*mas*):
-        Formal error on upsRA (VIM).
+        - **e_upsra** (*mas*): Formal error on upsRA (VIM).
 
-        - **e_upsde** (*mas*):
-        Formal error on upsDE (VIM).
+        - **e_upsde** (*mas*): Formal error on upsDE (VIM).
 
-        - **var** (*mas*):
-        Cosmic dispersion added (stochastic).
+        - **var** (*mas*): Cosmic dispersion added (stochastic).
 
-        - **gaia_gaiadr3_id** (*-*):
-        Gaia DR3 ID as matched by Gaia.
+        - **gaia_gaiadr3_id** (*-*): Gaia DR3 ID as matched by Gaia.
 
-        - **simbad_gaiadr3_id** (*-*):
-        Gaia DR3 ID as matched by SIMBAD.
+        - **simbad_gaiadr3_id** (*-*): Gaia DR3 ID as matched by SIMBAD.
 
-        - **gaiadr3_id_conflict** (*-*):
-        Indicates if there is a conflict in Gaia DR3 ID between sources.
+        - **gaiadr3_id_conflict** (*-*): Indicates if there is a conflict in Gaia DR3 ID between sources.
 
         Example
         -------
@@ -320,12 +284,11 @@ class AstrometryClass:
 
     def get_hipparcos_timeseries(self, id: str, output_format: str = None):
         """
-        Get the timeseries from the Hipparcos Intermediate Astrometric Data (IAD). Can be queried either with an Hipparcos
-        identifier, or with a Gaia DR3 identifier.
+        Get the timeseries for a target from the Hipparcos Intermediate Astrometric Data (IAD).
 
         All available formats are defined in this section (see :doc:`output_format`).
 
-        :param id: Hipparcos or Gaia DR3 identifier
+        :param id: Target name or identifier
         :type id: str
         :param output_format: The format you want for the result data
         :type output_format: Optional[str]
@@ -335,41 +298,29 @@ class AstrometryClass:
         Column descriptions
         -------------------
 
-        - **IORB** (*-*):
-        Orbit number.
+        - **IORB** (*-*): Orbit number.
 
-        - **EPOCH** (*years*):
-        Observation epoch, given as Year - 1991.25.
+        - **EPOCH** (*years*): Observation epoch, given as Year - 1991.25.
 
-        - **PARF** (*-*):
-        Parallax factor.
+        - **PARF** (*-*): Parallax factor.
 
-        - **CPSI** (*-*):
-        Cosine of Psi.
+        - **CPSI** (*-*): Cosine of Psi.
 
-        - **SPSI** (*-*):
-        Sine of Psi.
+        - **SPSI** (*-*): Sine of Psi.
 
-        - **RES** (*mas*):
-        Abscissa residual.
+        - **RES** (*mas*): Abscissa residual.
 
-        - **SRES** (*mas*):
-        Formal error on abscissa residual.
+        - **SRES** (*mas*): Formal error on abscissa residual.
 
-        - **HIP** (*-*):
-        Hipparcos identifier.
+        - **HIP** (*-*): Hipparcos identifier.
 
-        - **T_BJD** (*days*):
-        Epoch in Barycentric Julian Date (BJD).
+        - **T_BJD** (*days*): Epoch in Barycentric Julian Date (BJD).
 
-        - **S_MAS** (*mas*):
-        Absolute astrometric signal, RES + fitted model.
+        - **S_MAS** (*mas*): Absolute astrometric signal, RES + fitted model.
 
-        - **CTH** (*-*):
-        Cosine of the theta angle, following Gaia convention.
+        - **CTH** (*-*): Cosine of the theta angle, following Gaia convention.
 
-        - **STH** (*-*):
-        Sine of the theta angle, following Gaia convention.
+        - **STH** (*-*): Sine of the theta angle, following Gaia convention.
 
         Example
         -------
@@ -377,7 +328,6 @@ class AstrometryClass:
         .. code-block:: python
 
             from dace.astrometry import Astrometry
-
             Astrometry.get_hipparcos_timeseries("HIP 1000", output_format='pandas')
 
         """
@@ -425,8 +375,10 @@ class AstrometryClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.astrometry import Astrometry
-        >>> values = Astrometry.query_database()
+        .. code-block:: python
+
+            from dace_query.astrometry import Astrometry
+            values = Astrometry.query_database()
         """
 
         if filters is None:
@@ -462,9 +414,11 @@ class AstrometryClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.astrometry import Astrometry
-        >>> target_to_search = 'your-target'
-        >>> values = Astrometry.get_gaia_timeseries(target=target_to_search)
+        .. code-block:: python
+
+            from dace_query.astrometry import Astrometry
+            target_to_search = 'your-target'
+            values = Astrometry.get_gaia_timeseries(target=target_to_search)
 
         """
 
