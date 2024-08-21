@@ -64,52 +64,6 @@ class AstrometryClass:
         logger.addHandler(ch)
         self.log = logger
 
-    # def _check_id(self, id: str) -> str:
-    #     """
-    #     Check if the given id is valid.
-
-    #     :param id: The id to check
-    #     :type id: str
-    #     :return: catalog, id_number. The catalog name (HIP or GAIA DR3) and the id number.
-    #     :rtype: (str, str)
-    #     """
-    #     # Validate the input type
-    #     if not isinstance(id, str):
-    #         raise TypeError("The identifier must be a string.")
-
-    #     # Normalize the input
-    #     id = id.strip().upper()
-    #     id = re.sub(r"\s+", " ", id)  # Replace multiple spaces with a single space
-
-    #     # Identify the catalog and validate format
-    #     catalog = None
-    #     id_number = None
-
-    #     if id.startswith("HIP"):
-    #         catalog = "HIP"
-    #         id_number = id[3:].strip()  # Extract number after "HIP"
-    #         if not id_number.isdigit() or len(id_number) > 6:
-    #             raise ValueError("Invalid HIP identifier format.")
-    #     elif id.startswith("GAIA DR3"):
-    #         catalog = "GAIA DR3"
-    #         id_number = id[8:].strip()  # Extract number after "GAIA DR3"
-    #         if not id_number.isdigit() or len(id_number) <= 6:
-    #             raise ValueError("Invalid Gaia DR3 identifier format.")
-    #     else:
-    #         # Assume it's a number only, determine catalog based on length
-    #         id_number = id.strip()
-    #         if id_number.isdigit():
-    #             if len(id_number) <= 6:
-    #                 catalog = "HIP"
-    #             else:
-    #                 catalog = "GAIA DR3"
-    #         else:
-    #             raise ValueError(
-    #                 "Identifier must be a valid number or a recognized catalog prefix (HIP, Gaia DR3)."
-    #             )
-
-    #     return catalog, id_number
-
     def _simbad_id_check(self, id):
         """
         Queries Simbad to retrieve either its HIP or Gaia DR3 id. It return the name of the catalog
@@ -262,10 +216,7 @@ class AstrometryClass:
             # Query the Hipparcos database with a Gaia DR3 identifier
             Astrometry.query_hipparcos_database('Gaia DR3 2361372542600289664', output_format='pandas')
         """
-        # Validate the input type
-        # catalog, id_number = self._check_id(id)
-
-        # EXPERIMENTAL
+        # Query simbad to get the HIP or Gaia DR3 id
         catalog, id_number = self._simbad_id_check(id)
 
         # Query the backend
@@ -332,8 +283,7 @@ class AstrometryClass:
 
         """
 
-        # Validate the input type
-        # catalog, id_number = self._check_id(id)
+        # Query simbad to get the HIP or Gaia DR3 id
         catalog, id_number = self._simbad_id_check(id)
 
         # Query the backend
