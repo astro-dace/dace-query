@@ -162,6 +162,8 @@ cython_debug/
 # Visual Studio Code
 .vscode/
 
+# Ruff
+.ruff*/
 
 # Desktop Service Store
 .DS_Store

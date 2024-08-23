@@ -117,7 +117,7 @@ class AstrometryClass:
 
         :param id: Target name or identifier
         :type id: str
-        :param output_format: The format you want for the result data
+        :param output_format: The desired format for the result data.
         :type output_format: Optional[str]
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
@@ -203,6 +203,8 @@ class AstrometryClass:
 
         - **gaiadr3_id_conflict** (*-*): Indicates if there is a conflict in Gaia DR3 ID between sources.
 
+        - **iad_source** (*-*): Indicates the source of the IAD, either "Brandt2021" or "JavaTool".
+
         Example
         -------
 
@@ -241,7 +243,7 @@ class AstrometryClass:
 
         :param id: Target name or identifier
         :type id: str
-        :param output_format: The format you want for the result data
+        :param output_format: The desired format for the result data.
         :type output_format: Optional[str]
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
