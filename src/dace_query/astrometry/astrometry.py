@@ -275,6 +275,8 @@ class AstrometryClass:
 
         - **STH** (*-*): Sine of the theta angle, following Gaia convention.
 
+        - **IAD_SOURCE** (*-*): Indicates the source of the IAD, either "Brandt2021" or "JavaTool".
+
         Example
         -------
 
