@@ -1,3 +1,9 @@
+1.2.1
+*****
+
+* New standalone webapp for the Sun module.
+* Sun.get_timeseries() is deprecated and has been removed. Use query_database() instead.
+
 1.2.0
 *****
 
