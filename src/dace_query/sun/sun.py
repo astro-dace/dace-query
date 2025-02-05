@@ -37,7 +37,8 @@ class SunClass:
         >>> sun_instance = SunClass()
 
         """
-        self.__OBS_API = 'obs-webapp'
+        self.__SUN_API = "sun-webapp"
+        self.__OBS_API = "obs-webapp"
 
         if dace_instance is None:
             self.dace = Dace
@@ -51,16 +52,18 @@ class SunClass:
         logger = logging.getLogger(f"sun-{unique_logger_id}")
         logger.setLevel(logging.INFO)
         ch = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
         ch.setFormatter(formatter)
         logger.addHandler(ch)
         self.log = logger
 
-    def query_database(self,
-                       limit: Optional[int] = SUN_DEFAULT_LIMIT,
-                       filters: Optional[dict] = None,
-                       sort: Optional[dict] = None,
-                       output_format: Optional[str] = None):
+    def query_database(
+        self,
+        limit: Optional[int] = SUN_DEFAULT_LIMIT,
+        filters: Optional[dict] = None,
+        sort: Optional[dict] = None,
+        output_format: Optional[str] = None,
+    ):
         """
         Query the sun database to retrieve data in the chosen format.
 
@@ -90,41 +93,45 @@ class SunClass:
 
         return self.dace.transform_to_format(
             self.dace.request_get(
-                api_name=self.__OBS_API,
-                endpoint='sun/search',
+                api_name=self.__SUN_API,
+                endpoint="search",
                 params={
-                    'limit': str(limit),
-                    'filters': json.dumps(filters),
-                    'sort': json.dumps(sort)
-                }
-            ), output_format=output_format
+                    "limit": str(limit),
+                    "filters": json.dumps(filters),
+                    "sort": json.dumps(sort),
+                },
+            ),
+            output_format=output_format,
         )
 
-    def get_timeseries(self, output_format: Optional[str] = None):
-        """
-        Get all sun timeseries.
+    # def get_timeseries(self, output_format: Optional[str] = None):
+    #     """
+    #     Get all sun timeseries.
 
-        All available formats are defined in this section (see :doc:`output_format`).
+    #     All available formats are defined in this section (see :doc:`output_format`).
 
-        :param output_format: Type of data returns
-        :type output_format: Optional[str]
-        :return: The desired data in the chosen output format
+    #     :param output_format: Type of data returns
+    #     :type output_format: Optional[str]
+    #     :return: The desired data in the chosen output format
 
-        >>> from dace_query.sun import Sun
-        >>> values = Sun.get_timeseries()
-        """
-        return self.dace.transform_to_format(
-            self.dace.request_get(
-                api_name=self.__OBS_API,
-                endpoint='sun/radialVelocities',
-            ), output_format=output_format
-        )
+    #     >>> from dace_query.sun import Sun
+    #     >>> values = Sun.get_timeseries()
+    #     """
+    #     return self.dace.transform_to_format(
+    #         self.dace.request_get(
+    #             api_name=self.__SUN_API,
+    #             endpoint="sun/radialVelocities",
+    #         ),
+    #         output_format=output_format,
+    #     )
 
-    def download(self,
-                 file_type: str,
-                 filters: Optional[dict] = None,
-                 output_directory: Optional[str] = None,
-                 output_filename: Optional[str] = None) -> None:
+    def download(
+        self,
+        file_type: str,
+        filters: Optional[dict] = None,
+        output_directory: Optional[str] = None,
+        output_filename: Optional[str] = None,
+    ) -> None:
         """
         Download Sun spectroscopy products (S1D, S2D, ...).
 
@@ -145,38 +152,43 @@ class SunClass:
         """
 
         if file_type not in Spectroscopy.ACCEPTED_FILE_TYPES:
-            raise ValueError('file_type must be one of these values : ' + ','.join(Spectroscopy.ACCEPTED_FILE_TYPES))
+            raise ValueError(
+                "file_type must be one of these values : "
+                + ",".join(Spectroscopy.ACCEPTED_FILE_TYPES)
+            )
         if filters is None:
             filters = {}
 
-        sun_spectroscopy_data = self.query_database(filters=filters, output_format='dict')
-        files = sun_spectroscopy_data.get('file_rootpath', [])
+        sun_spectroscopy_data = self.query_database(
+            filters=filters, output_format="dict"
+        )
+        files = sun_spectroscopy_data.get("file_rootpath", [])
 
         download_response = self.dace.request_post(
             api_name=self.__OBS_API,
-            endpoint='download/prepare/sun',
-            data=json.dumps({
-                'fileType': file_type,
-                'files': files
-            })
-
+            endpoint="download/prepare/sun",
+            data=json.dumps({"fileType": file_type, "files": files}),
         )
+
         if not download_response:
             return None
-        download_id = download_response['values'][0]
+
+        download_id = download_response["values"][0]
         self.dace.persist_file_on_disk(
             api_name=self.__OBS_API,
-            obs_type='sun',
+            obs_type="sun",
             download_id=download_id,
             output_directory=output_directory,
-            output_filename=output_filename
+            output_filename=output_filename,
         )
 
-    def download_files(self,
-                       file_type: Optional[str] = 's1d',
-                       files: Optional[list[str]] = None,
-                       output_directory: Optional[str] = None,
-                       output_filename: Optional[str] = None) -> None:
+    def download_files(
+        self,
+        file_type: Optional[str] = "s1d",
+        files: Optional[list[str]] = None,
+        output_directory: Optional[str] = None,
+        output_filename: Optional[str] = None,
+    ) -> None:
         """
         Download reduction products specified in argument for the list of raw files specified and save it locally.
 
@@ -200,32 +212,36 @@ class SunClass:
         if files is None:
             raise NoDataException
 
-        files = list(map(lambda file: f'{file}.fits' if not file.endswith('.fits') else file, files))
+        files = list(
+            map(
+                lambda file: f"{file}.fits" if not file.endswith(".fits") else file,
+                files,
+            )
+        )
 
         download_response = self.dace.request_post(
             api_name=self.__OBS_API,
-            endpoint='download/prepare/sun',
-            data=json.dumps({
-                'fileType': file_type,
-                'files': files
-            })
+            endpoint="download/prepare/sun",
+            data=json.dumps({"fileType": file_type, "files": files}),
         )
         if not download_response:
             return None
-        download_id = download_response['values'][0]
+        download_id = download_response["values"][0]
         self.dace.persist_file_on_disk(
             api_name=self.__OBS_API,
-            obs_type='sun',
+            obs_type="sun",
             download_id=download_id,
             output_directory=output_directory,
-            output_filename=output_filename
+            output_filename=output_filename,
         )
 
-    def download_public_release_all(self,
-                                    year: str,
-                                    month: str,
-                                    output_directory: Optional[str] = None,
-                                    output_filename: Optional[str] = None) -> None:
+    def download_public_release_all(
+        self,
+        year: str,
+        month: str,
+        output_directory: Optional[str] = None,
+        output_filename: Optional[str] = None,
+    ) -> None:
         """
         Download public sun data of year and month specified in arguments.
 
@@ -243,18 +259,20 @@ class SunClass:
         >>> # Sun.download_public_release_all('2015','12', output_directory='/tmp', output_filename='release_all_2015-12.tar.gz')
 
         """
-        year_and_month = str(year) + '-' + str(month)
+        year_and_month = str(year) + "-" + str(month)
         self.dace.download_file(
             api_name=self.__OBS_API,
-            endpoint=f'sun/download/release/all/{year_and_month}',
+            endpoint=f"sun/download/release/all/{year_and_month}",
             output_directory=output_directory,
-            output_filename=output_filename
+            output_filename=output_filename,
         )
 
-    def download_public_release_ccf(self,
-                                    year: str,
-                                    output_directory: Optional[str] = None,
-                                    output_filename: Optional[str] = None) -> None:
+    def download_public_release_ccf(
+        self,
+        year: str,
+        output_directory: Optional[str] = None,
+        output_filename: Optional[str] = None,
+    ) -> None:
         """
         Download public ccf data realease of year specified in argument.
 
@@ -270,15 +288,17 @@ class SunClass:
         """
         self.dace.download_file(
             api_name=self.__OBS_API,
-            endpoint=f'sun/download/release/ccf/{year}',
+            endpoint=f"sun/download/release/ccf/{year}",
             output_directory=output_directory,
-            output_filename=output_filename
+            output_filename=output_filename,
         )
 
-    def download_public_release_timeseries(self,
-                                           period: Optional[str] = '2015-2018',
-                                           output_directory: Optional[str] = None,
-                                           output_filename: Optional[str] = None) -> None:
+    def download_public_release_timeseries(
+        self,
+        period: Optional[str] = "2015-2018",
+        output_directory: Optional[str] = None,
+        output_filename: Optional[str] = None,
+    ) -> None:
         """
         Download public timeseries data release for a specified period and save it locally.
 
@@ -297,9 +317,9 @@ class SunClass:
         """
         self.dace.download_file(
             api_name=self.__OBS_API,
-            endpoint=f'sun/download/release/timeseries/{period}',
+            endpoint=f"sun/download/release/timeseries/{period}",
             output_directory=output_directory,
-            output_filename=output_filename
+            output_filename=output_filename,
         )
 
 
