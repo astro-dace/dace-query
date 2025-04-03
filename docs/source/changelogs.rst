@@ -1,3 +1,10 @@
+1.2.2
+*****
+
+* Fixed a bug where column names in the Simbad result of astroquery module were updated to be
+  lowercase. Changed "IDS" to "ids".
+
+
 1.2.1
 *****
 
