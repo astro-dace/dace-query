@@ -93,7 +93,7 @@ class AstrometryClass:
             raise ValueError(f"No object found for the given identifier: {id}")
 
         # Extract all identifiers
-        all_ids = result["IDS"][0].split("|")
+        all_ids = result["ids"][0].split("|")
 
         # Check for HIP id
         hip_ids = [i for i in all_ids if i.startswith("HIP ")]
