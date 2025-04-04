@@ -1,4 +1,12 @@
-1.2.2
+1.2.3
+*****
+
+* Reverted the required setuptools version to below 77.0.0 due to changes in how the license is 
+  reported in ``pyproject.toml``. This avoids requiring a newer setuptools version that is not yet 
+  available in ``conda``.
+
+
+1.2.3
 *****
 
 * Fixed a bug where column names in the Simbad result of astroquery module were updated to be
