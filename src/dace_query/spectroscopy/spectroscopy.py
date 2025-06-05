@@ -20,12 +20,17 @@ class SpectroscopyClass:
     The spectroscopy class.
     Use to retrieve data from the spectroscopy module.
 
-    **A spectroscopy instance is already provided, to use it:**
 
-    >>> from dace_query.spectroscopy import Spectroscopy
+    .. tip::
+    
+        A spectroscopy instance is already provided, to use it:
+        
+        .. code-block:: python
+
+            from dace_query.spectroscopy import Spectroscopy
 
     """
-    ACCEPTED_FILE_TYPES = ['s1d', 's2d', 'ccf', 'bis', 'all']
+    __ACCEPTED_FILE_TYPES = ['s1d', 's2d', 'ccf', 'bis', 'all']
 
     def __init__(self, dace_instance: Optional[DaceClass] = None):
         """
@@ -34,8 +39,10 @@ class SpectroscopyClass:
         :param dace_instance: A dace object
         :type dace_instance: Optional[DaceClass]
 
-        >>> from dace_query.spectroscopy import SpectroscopyClass
-        >>> spectroscopy_instance = SpectroscopyClass()
+        .. code-block:: python
+
+            from dace_query.spectroscopy import SpectroscopyClass
+            spectroscopy_instance = SpectroscopyClass()
         """
         self.__OBS_API = 'obs-webapp'
 
@@ -79,8 +86,14 @@ class SpectroscopyClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.spectroscopy import Spectroscopy
-        >>> values = Spectroscopy.query_database()
+        .. dropdown:: Getting all spectroscopy data
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.spectroscopy import Spectroscopy
+                values = Spectroscopy.query_database()
 
         """
         if filters is None:
@@ -126,12 +139,18 @@ class SpectroscopyClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.spectroscopy import Spectroscopy
-        >>> from astropy.coordinates import SkyCoord, Angle
-        >>> sky_coord, angle = SkyCoord("23h13m16s", "+57d10m06s", frame='icrs'), Angle('0.045d')
-        >>> values = Spectroscopy.query_region(sky_coord=sky_coord, angle=angle)
+        .. dropdown:: Searching for spectroscopy data using a cone search
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.spectroscopy import Spectroscopy
+                from astropy.coordinates import SkyCoord, Angle
+                sky_coord, angle = SkyCoord("23h13m16s", "+57d10m06s", frame='icrs'), Angle('0.045d')
+                values = Spectroscopy.query_region(sky_coord=sky_coord, angle=angle)
         """
-        coordinate_filter_dict = self.dace.transform_coordinates_to_dict(sky_coord, angle)
+        coordinate_filter_dict = self.dace.transform_coordinates_to_dict_old(sky_coord, angle)
         filters_with_coordinates = {}
         if filters is not None:
             filters_with_coordinates.update(filters)
@@ -145,8 +164,18 @@ class SpectroscopyClass:
                  output_filename: Optional[str] = None):
         """
         Download Spectroscopy products (S1D, S2D, ...) and save it locally depending on the specified arguments.
-
-        File type available are [ 's1d', 's2d', 'ccf', 'bis', 'guidance', 'all' ].
+        
+        .. dropdown:: Available file types
+            :color: info
+            :icon: list-unordered
+            :open:
+        
+            * ``'s1d'``
+            * ``'s2d'``
+            * ``'ccf'``
+            * ``'bis'``
+            * ``'guidance'``
+            * ``'all'``
 
         Filters can be applied to the query via named arguments (see :doc:`query_options`).
 
@@ -159,12 +188,18 @@ class SpectroscopyClass:
         :param output_filename: The filename for the download
         :type output_filename: Optional[str]
 
-        >>> from dace_query.spectroscopy import Spectroscopy
-        >>> filters_to_use = {'file_rootpath': {'contains':['HARPS.2010-04-04T03:38:51.386.fits']}}
-        >>> # Spectroscopy.download('s1d', filters=filters_to_use, output_filename='files.tar.gz')
+        .. dropdown:: Downloading spectroscopy products
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.spectroscopy import Spectroscopy
+                filters_to_use = {'file_rootpath': {'contains':['HARPS.2010-04-04T03:38:51.386.fits']}}
+                Spectroscopy.download('s1d', filters=filters_to_use, output_filename='files.tar.gz')
         """
-        if file_type not in self.ACCEPTED_FILE_TYPES:
-            raise ValueError('file_type must be one of these values : ' + ','.join(self.ACCEPTED_FILE_TYPES))
+        if file_type not in self.__ACCEPTED_FILE_TYPES:
+            raise ValueError('file_type must be one of these values : ' + ','.join(self.__ACCEPTED_FILE_TYPES))
         if filters is None:
             filters = {}
 
@@ -198,7 +233,17 @@ class SpectroscopyClass:
         """
         Download reduction products specified in argument for the list of raw files specified and save it locally.
 
-        File type available are ['s1d', 's2d', 'ccf', 'bis', 'guidance', 'all']
+        .. dropdown:: Available file types
+            :color: info
+            :icon: list-unordered
+            :open:
+        
+            * ``'s1d'``
+            * ``'s2d'``
+            * ``'ccf'``
+            * ``'bis'``
+            * ``'guidance'``
+            * ``'all'``
 
         :param files: The raw files
         :type files: list[str]
@@ -210,9 +255,15 @@ class SpectroscopyClass:
         :type output_filename: Optional[str]
         :return: None
 
-        >>> from dace_query.spectroscopy import Spectroscopy
-        >>> files_to_download = ['harps/DRS-3.5/reduced/2019-07-05/HARPS.2019-07-06T04:00:00.323.fits']
-        >>> # Spectroscopy.download_files(files=files_to_download, file_type='all')
+        .. dropdown:: Downloading reduction products for a list of raw files
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.spectroscopy import Spectroscopy
+                files_to_download = ['harps/DRS-3.5/reduced/2019-07-05/HARPS.2019-07-06T04:00:00.323.fits']
+                Spectroscopy.download_files(files=files_to_download, file_type='all')
         """
 
         if files is None:
@@ -256,9 +307,15 @@ class SpectroscopyClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.spectroscopy import Spectroscopy
-        >>> target_to_search = "C15-0734"
-        >>> values = Spectroscopy.get_timeseries(target=target_to_search)
+        .. dropdown:: Getting spectroscopy timeseries for a target
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.spectroscopy import Spectroscopy
+                target_to_search = "C15-0734"
+                values = Spectroscopy.get_timeseries(target=target_to_search)
 
         """
         spectroscopy_data = self.dace.request_get(
@@ -273,4 +330,12 @@ class SpectroscopyClass:
 
 
 Spectroscopy: SpectroscopyClass = SpectroscopyClass()
-"""Spectroscopy instance"""
+"""
+This is a singleton instance of the :class:`SpectroscopyClass` class.
+
+To use it, simply import it :
+
+.. code-block:: python
+
+    from dace_query.spectroscopy import Spectroscopy
+"""

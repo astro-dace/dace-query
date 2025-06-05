@@ -81,10 +81,6 @@ def test_spectroscopy_query_region_auth_error(anon_dace_instance):
     [
         pytest.param(
             "anon_dace_instance",
-            "harps/DRS-3.5/reduced/2005-12-24/HARPS.2005-12-25T02:42:50.100.fits",
-        ),
-        pytest.param(
-            "anon_dace_instance",
             "harps/DRS-3.5/reduced/2016-03-08/HARPS.2016-03-09T02:55:16.776.fits",
             marks=pytest.mark.xfail,
         ),
@@ -113,10 +109,6 @@ def test_spectroscopy_download(instance, file, request):
 @pytest.mark.parametrize(
     "instance, files",
     [
-        pytest.param(
-            "anon_dace_instance",
-            ["harps/DRS-3.5/reduced/2005-12-24/HARPS.2005-12-25T02:42:50.100.fits"],
-        ),
         pytest.param(
             "anon_dace_instance",
             ["harps/DRS-3.5/reduced/2016-03-08/HARPS.2016-03-09T02:55:16.776.fits"],

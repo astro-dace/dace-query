@@ -1,21 +1,21 @@
-dace\_query.opendata package
+:html_theme.sidebar_secondary.remove:
+
+Open data
 ============================
 
-Submodules
-----------
+.. deprecated:: 2.0.0
+      The :mod:`~dace_query.opendata.opendata` module is deprecated and is currently being reworked.
+      currently, all functionality of this module has been halted.
 
-dace\_query.opendata.opendata module
-------------------------------------
 
-.. automodule:: dace_query.opendata.opendata
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
-Module contents
----------------
+.. dropdown:: Deprecated module
+   :color: warning
+   :icon: info
+   :open:
 
-.. automodule:: dace_query.opendata
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   .. automodule:: dace_query.opendata.opendata
+      :members:
+      :undoc-members:
+      :show-inheritance:
+

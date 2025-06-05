@@ -83,67 +83,23 @@ def test_astrometry_query_database_keys(instance, request: pytest.FixtureRequest
     assert all((key in results.keys()) for key in expected_keys)
 
 
-###########################
 @pytest.mark.parametrize(
-    "id",
+    "gaia_id",
     [
-        pytest.param(None, id="No id", marks=pytest.mark.xfail),
-        pytest.param("HIP 1000", id="HIP id"),
-        pytest.param("Gaia DR3 2361372542600289664", id="Gaia id"),
-        pytest.param("HD 812", id="HD id"),
-        pytest.param("Invalid ID", id="Invalid id", marks=pytest.mark.xfail),
+        pytest.param(None, id="No id"),
+        pytest.param("GAIA DR3 2361372542600289664", id="Gaia id"),
+        pytest.param("GAIA DR3 379224622734044800", id="Conflicting Gaia id", marks=pytest.mark.xfail),
     ],
 )
-def test_query_hipparcos_database(anon_dace_instance, id):
-    """
-    Test the 'query_hipparcos_database' function.
-
-    Parameters
-    ----------
-    anon_dace_instance : DaceClass
-        An instance of the DaceClass.
-    id : str
-        The identifier (HIP, Gaia DR3, or HD).
-    """
-    dace_instance: DaceClass = anon_dace_instance
-    instance = AstrometryClass(dace_instance=dace_instance)
-
-    if not id:
-        with pytest.raises(
-            ValueError, match="Please provide either a HIP id or a Gaia DR3 id."
-        ):
-            instance.query_hipparcos_database(id=id, output_format="dict")
-    else:
-        results = instance.query_hipparcos_database(id=id, output_format="dict")
-        # Result is not empty
-        assert results
-
-        # Check if results contain the correct HIP ID (1000)
-        assert results["hip"][0] == 1000
-
-
-@pytest.mark.parametrize(
-    "id",
-    [
-        pytest.param(None, id="No id", marks=pytest.mark.xfail),
-        pytest.param("HIP 1000", id="HIP id"),
-        pytest.param("Gaia DR3 2361372542600289664", id="Gaia id"),
-        pytest.param("HD 812", id="HD id"),
-        pytest.param("Invalid ID", id="Invalid id", marks=pytest.mark.xfail),
-    ],
-)
-def test_get_hipparcos_timeseries(anon_dace_instance, id):
+def test_get_hipparcos_timeseries_gaia(admin_dace_instance, gaia_id):
     """
     Test the 'get_hipparcos_timeseries' function.
 
-    Parameters
-    ----------
-    anon_dace_instance : DaceClass
-        An instance of the DaceClass.
-    id : str
-        The identifier (HIP, Gaia DR3, or HD).
+    Parameters:
+    - admin_dace_instance: An instance of the DaceClass.
+    - gaia_id: The Gaia ID.
     """
-    dace_instance: DaceClass = anon_dace_instance
+    dace_instance: DaceClass = admin_dace_instance
     instance = AstrometryClass(dace_instance=dace_instance)
 
     expected_keys = [
@@ -161,15 +117,13 @@ def test_get_hipparcos_timeseries(anon_dace_instance, id):
         "STH",
     ]
 
-    if not id:
+    if not gaia_id:
         with pytest.raises(
             ValueError, match="Please provide either a HIP id or a Gaia DR3 id."
         ):
-            instance.get_hipparcos_timeseries(id=id, output_format="dict")
+            instance.get_hipparcos_timeseries(id=gaia_id, output_format="dict")
     else:
-        results: pd.DataFrame = instance.get_hipparcos_timeseries(
-            id=id, output_format="dict"
-        )
+        results: pd.DataFrame = instance.get_hipparcos_timeseries(id=gaia_id, output_format="dict")
         # Result is not empty
         assert results
         # Result has expected length
@@ -177,5 +131,51 @@ def test_get_hipparcos_timeseries(anon_dace_instance, id):
         # Check if all columns are present
         assert all((key in results.keys()) for key in expected_keys)
 
-        # Check that the correct HIP ID (1000) is retrieved
-        assert results["HIP"][0] == 1000
+
+@pytest.mark.parametrize(
+    "hip_id",
+    [
+        pytest.param(None, id="No id"),
+        pytest.param("HIP 1000", id="HIP id"),
+        pytest.param("-1", id="Invalid HIP id", marks=pytest.mark.xfail),
+    ],
+)
+def test_get_hipparcos_timeseries_hip(admin_dace_instance, hip_id):
+    """
+    Test the 'get_hipparcos_timeseries' function.
+
+    Parameters:
+    - admin_dace_instance: An instance of the DaceClass.
+    - hip_id: The Hipparcos ID.
+    """
+    dace_instance: DaceClass = admin_dace_instance
+    instance = AstrometryClass(dace_instance=dace_instance)
+
+    expected_keys = [
+        "IORB",
+        "EPOCH",
+        "PARF",
+        "CPSI",
+        "SPSI",
+        "RES",
+        "SRES",
+        "HIP",
+        "T_BJD",
+        "S_MAS",
+        "CTH",
+        "STH",
+    ]
+
+    if not hip_id:
+        with pytest.raises(
+            ValueError, match="Please provide either a HIP id or a Gaia DR3 id."
+        ):
+            instance.get_hipparcos_timeseries(id=hip_id, output_format="dict")
+    else:
+        results: pd.DataFrame = instance.get_hipparcos_timeseries(id=hip_id, output_format="dict")
+        # Result is not empty
+        assert results
+        # Result has expected length
+        assert len(results["IORB"]) == 103
+        # Check if all columns are present
+        assert all((key in results.keys()) for key in expected_keys)

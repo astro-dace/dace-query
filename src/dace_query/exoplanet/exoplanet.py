@@ -11,16 +11,21 @@ from pandas import DataFrame
 from dace_query import Dace, DaceClass
 
 EXOPLANET_DEFAULT_LIMIT = 10000
-
+PLANETS_CATALOG_NAME = 'planets'
+ATREIDES_CATALOG_NAME = 'atreides'
 
 class ExoplanetClass:
     """
     The exoplanet class.
     Use to retrieve data from the exoplanet module.
 
-    **An exoplanet instance is already provided, to use it:**
+    .. tip::
+    
+        An exoplanet instance is already provided, to use it:
 
-    >>> from dace_query.exoplanet import Exoplanet
+        .. code-block:: python
+
+            from dace_query.exoplanet import Exoplanet
 
     """
     __EXOPLANET_ENDPOINT = 'ExoplanetAPI/exoplanetDatabase'
@@ -32,8 +37,10 @@ class ExoplanetClass:
         :param dace_instance: A dace object
         :type dace_instance: Optional[DaceClass]
 
-        >>> from dace_query.exoplanet import ExoplanetClass
-        >>> exoplanet_instance = ExoplanetClass()
+        .. code-block:: python
+
+            from dace_query.exoplanet import ExoplanetClass
+            exoplanet_instance = ExoplanetClass()
 
         """
 
@@ -57,6 +64,7 @@ class ExoplanetClass:
         self.log = logger
 
     def query_database(self,
+                       catalog: Optional[str] = PLANETS_CATALOG_NAME,
                        limit: Optional[int] = EXOPLANET_DEFAULT_LIMIT,
                        filters: Optional[dict] = None,
                        sort: Optional[dict] = None,
@@ -68,6 +76,19 @@ class ExoplanetClass:
 
         All available formats are defined in this section (see :doc:`output_format`).
 
+        You may specify the catalog to query using the ``catalog`` parameter.
+        
+        
+        .. dropdown:: Available catalogs
+            :color: info
+            :icon: list-unordered
+            :open:
+            
+            * - ``'planets'`` : The PlanetS exoplanet database **(selected by default)**
+            * - ``'atreides'`` : The Atreides exoplanet database
+
+        :param catalog: Name of the catalog to query (``'planets'`` or ``'atreides'``)
+        :type catalog: Optional[str]
         :param limit: Maximum number of rows to return
         :type limit: Optional[int]
         :param filters: Filters to apply to the query
@@ -78,10 +99,29 @@ class ExoplanetClass:
         :type output_format: Optional[str]
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
+    
+    
+        .. dropdown:: Getting all exoplanet data
+            :color: success
+            :icon: code-square
 
-        >>> from dace_query.exoplanet import Exoplanet
-        >>> values = Exoplanet.query_database()
+            .. code-block:: python
+            
+                from dace_query.exoplanet import Exoplanet
+                values = Exoplanet.query_database()
+                
+        .. dropdown:: Getting data from a specific catalog
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+            
+                from dace_query.exoplanet import Exoplanet
+                values = Exoplanet.query_database(catalog='atreides')
         """
+
+        if catalog not in [PLANETS_CATALOG_NAME, ATREIDES_CATALOG_NAME]:
+            raise ValueError(f"Catalog {catalog} does not exist. Please use {PLANETS_CATALOG_NAME} or {ATREIDES_CATALOG_NAME}.")
 
         if filters is None:
             filters = {}
@@ -91,8 +131,9 @@ class ExoplanetClass:
         return self.dace.transform_to_format(
             self.dace.request_get(
                 api_name=self.__EXOPLANET_API,
-                endpoint='exoplanetDatabase',
-                params={'limit': str(limit),
+                endpoint=f'search/{catalog}',
+                params={
+                        'limit': str(limit),
                         'filters': json.dumps(filters),
                         'sort': json.dumps(sort)}
             ), output_format=output_format)
@@ -100,5 +141,11 @@ class ExoplanetClass:
 
 Exoplanet: ExoplanetClass = ExoplanetClass()
 """
-Exoplanet instance
+This is a singleton instance of the :class:`ExoplanetClass` class.
+
+To use it, simply import it :
+
+.. code-block:: python
+
+    from dace_query.exoplanet import Exoplanet
 """

@@ -18,9 +18,14 @@ class OpenDataClass:
     The opendata class.
     Use to retrieve data from the opendata module.
 
-    **An opendata instance is already provided, to use it:**
+    .. tip::
+    
+        An opendata instance is already provided, to use it:
 
-    >>> from dace_query.opendata import OpenData
+        .. code-block:: python
+
+            from dace_query.opendata import OpenData
+
     """
 
     def __init__(self, dace_instance: Optional[DaceClass] = None):
@@ -30,8 +35,10 @@ class OpenDataClass:
         :param dace_instance: A dace object
         :type dace_instance: Optional[DaceClass]
 
-        >>> from dace_query.opendata import OpenDataClass
-        >>> opendata_instance = OpenDataClass()
+        .. code-block:: python            
+            
+            from dace_query.opendata import OpenDataClass
+            opendata_instance = OpenDataClass()
         """
 
         self.__OPEN_DATA_API = 'open-webapp'
@@ -79,9 +86,15 @@ class OpenDataClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.opendata import OpenData
-        >>> values =  OpenData.query_database()
+        .. code-block:: python
+
+            from dace_query.opendata import OpenData
+            values =  OpenData.query_database()
         """
+
+        raise DeprecationWarning(
+            'The OpenDataClass class is being reworked and is not currently available.'
+        )
 
         if filters is None:
             filters = {}
@@ -136,10 +149,16 @@ class OpenDataClass:
         :type output_filename: Optional[str]
         :return: None
 
-        >>> from dace_query.opendata import OpenData
-        >>> # OpenData.download('2019MNRAS.483.5534S', 'archive', output_directory='/tmp', output_filename='opendata.tar.gz')
+        .. code-block:: python
+
+            from dace_query.opendata import OpenData
+            # OpenData.download('2019MNRAS.483.5534S', 'archive', output_directory='/tmp', output_filename='opendata.tar.gz')
 
         """
+        raise DeprecationWarning(
+            'The OpenDataClass class is being reworked and is not currently available.'
+        )
+
 
         if file_type not in self.__OPENDATA_AVAILABLE_FILE_TYPES:
             raise ValueError('file_type must be : ' + ','.join(self.__OPENDATA_AVAILABLE_FILE_TYPES))
@@ -153,4 +172,12 @@ class OpenDataClass:
 
 
 OpenData: OpenDataClass = OpenDataClass()
-"""OpenData instance"""
+"""
+This is a singleton instance of the :class:`OpenDataClass` class.
+
+To use it, simply import it :
+
+.. code-block:: python
+
+    from dace_query.opendata import OpenData
+"""

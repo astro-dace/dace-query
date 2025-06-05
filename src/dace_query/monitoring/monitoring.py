@@ -17,11 +17,15 @@ class MonitoringClass:
     The monitoring class.
     Use to retrieve data from the monitoring module.
 
-    **A monitoring instance is already provided, to use it :**
-
-    >>> from dace_query.monitoring import Monitoring
-
+    .. tip::
+    
+        A monitoring instance is already provided, to use it:
+        
+        .. code-block:: python
+        
+            from dace_query.monitoring import Monitoring
     """
+
 
     def __init__(self, dace_instance: DaceClass = None):
         """
@@ -30,8 +34,10 @@ class MonitoringClass:
         :param dace_instance: A dace object
         :type dace_instance: Optional[DaceClass]
 
-        >>> from dace_query.monitoring import MonitoringClass
-        >>> monitoring_instance = MonitoringClass()
+        .. code-block:: python
+
+            from dace_query.monitoring import MonitoringClass
+            monitoring_instance = MonitoringClass()
         """
         self.__MONITORING_API = 'monitoring-webapp'
 
@@ -63,17 +69,33 @@ class MonitoringClass:
         All available formats are defined in this section (see :doc:`output_format`).
 
         Available pipeline names are:
-            - ``TRANSFER``: From remote archive to Geneva archive (Transfer)
-            - ``GENEVA``: From reduction in Geneva to DACE import (Reduction and import)
-            - ``FULL``: From remote archive to DACE import (Transfer, reduction and import)
+        
+        - ``TRANSFER``: From remote archive to Geneva archive (Transfer)
+        - ``GENEVA``: From reduction in Geneva to DACE import (Reduction and import)
+        - ``FULL``: From remote archive to DACE import (Transfer, reduction and import)
 
-        The supported combinations are indicated below and described as ``(instrument name; date of the night; pipeline name)`` :
+        The supported combinations are indicated below :
 
-            - HARPS, NIGHT, [ TRANSFER, GENEVA, FULL ]
-            - ESPRESSO, NIGHT, [ TRANSFER, GENEVA, FULL ]
-            - CORALIE14, NIGHT, [ TRANSFER, GENEVA, FULL ]
-            - ECAM, NIGHT, [ TRANSFER ]
-            - HARPN, NIGHT, [ TRANSFER ]
+        .. list-table:: Possible instrument/pipeline combinations
+            :header-rows: 1
+            
+            * - Instrument name
+              - Pipeline name
+              
+            * - ``'HARPS'``
+              - ``'TRANSFER'`` or ``'GENEVA'`` or ``'FULL'``
+              
+            * - ``'ESPRESSO'``
+              - ``'TRANSFER'`` or ``'GENEVA'`` or ``'FULL'``
+              
+            * - ``'CORALIE14'``
+              - ``'TRANSFER'`` or ``'GENEVA'`` or ``'FULL'``
+              
+            * - ``'ECAM'``
+              - ``'TRANSFER'``
+              
+            * - ``'HARPN'``
+              - ``'TRANSFER'``
 
         :param instrument: The instrument name
         :type instrument: str
@@ -86,8 +108,14 @@ class MonitoringClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.monitoring import Monitoring
-        >>> values = Monitoring.query_transfer_by_night(instrument='HARPS', pipeline='FULL', night='2022-11-08')
+        .. dropdown:: Getting the monitoring data for a specific night, instrument and pipeline
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+              from dace_query.monitoring import Monitoring
+              values = Monitoring.query_transfer_by_night(instrument='HARPS', pipeline='FULL', night='2022-11-08')
         """
 
         complete_name = f"{instrument}_{pipeline}".upper()
@@ -104,23 +132,39 @@ class MonitoringClass:
                                  ) -> Union[dict[str, ndarray], DataFrame, Table, dict]:
         """
         Query the monitoring database ot retrieve data in the chosen format for the specified instrument, period and
-        period.
+        pipeline.
 
         All available formats are defined in this section (see :doc:`output_format`).
 
 
         Available pipeline names are:
-            - ``TRANSFER``: From remote archive to Geneva archive (Transfer)
-            - ``GENEVA``: From reduction in Geneva to DACE import (Reduction and import)
-            - ``FULL``: From remote archive to DACE import (Transfer, reduction and import)
+        
+        - ``TRANSFER``: From remote archive to Geneva archive (Transfer)
+        - ``GENEVA``: From reduction in Geneva to DACE import (Reduction and import)
+        - ``FULL``: From remote archive to DACE import (Transfer, reduction and import)
 
-        The supported combinations are indicated below and described as ``(instrument name; period dates; pipeline name)``:
+        The supported combinations are indicated below :
 
-            - HARPS, PERIOD, [ TRANSFER, GENEVA, FULL ]
-            - ESPRESSO, PERIOD, [TRANSFER, GENEVA, FULL]
-            - CORALIE14, PERIOD, [TRANSFER, GENEVA, FULL]
-            - ECAM, PERIOD, [ TRANSFER ]
-            - HARPN, PERIOD, [ GENEVA ]
+        .. list-table:: Possible instrument/pipeline combinations
+            :header-rows: 1
+            
+            * - Instrument name
+              - Pipeline name
+              
+            * - ``'HARPS'``
+              - ``'TRANSFER'`` or ``'GENEVA'`` or ``'FULL'``
+              
+            * - ``'ESPRESSO'``
+              - ``'TRANSFER'`` or ``'GENEVA'`` or ``'FULL'``
+              
+            * - ``'CORALIE14'``
+              - ``'TRANSFER'`` or ``'GENEVA'`` or ``'FULL'``
+              
+            * - ``'ECAM'``
+              - ``'TRANSFER'``
+              
+            * - ``'HARPN'``
+              - ``'GENEVA'``
 
         :param instrument: The instrument name
         :type instrument: str
@@ -133,8 +177,14 @@ class MonitoringClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.monitoring import Monitoring
-        >>> values = Monitoring.query_transfer_by_period(instrument='HARPS', pipeline='FULL', period=('2022-11-07', '2022-11-09'))
+        .. dropdown:: Getting the monitoring data for a specific period, instrument and pipeline
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+              from dace_query.monitoring import Monitoring
+              values = Monitoring.query_transfer_by_period(instrument='HARPS', pipeline='FULL', period=('2022-11-07', '2022-11-09'))
         """
 
         complete_name = f"{instrument}_{pipeline}".upper()
@@ -156,15 +206,27 @@ class MonitoringClass:
 
 
         Available pipeline names are:
-            - ``TRANSFER``: From remote archive to Geneva archive (Transfer)
-            - ``GENEVA``: From reduction in Geneva to DACE import (Reduction and import)
-            - ``FULL``: From remote archive to DACE import (Transfer, reduction and import)
+        
+        - ``TRANSFER``: From remote archive to Geneva archive (Transfer)
+        - ``GENEVA``: From reduction in Geneva to DACE import (Reduction and import)
+        - ``FULL``: From remote archive to DACE import (Transfer, reduction and import)
 
 
-        The supported combinations are indicated below and described as ``(instrument name; program name; pipeline name)``:
+        The supported combinations are indicated below :
+        
+        .. list-table:: Possible instrument/pipeline combinations
+            :header-rows: 1
+            
+            * - Instrument
+              - Pipeline
+              
+            * - ``'HARPS'``
+              - ``'TRANSFER'`` or ``'FULL'``
+              
+            * - ``'ESPRESSO'``
+              - ``'TRANSFER'`` or ``'FULL'``
 
-            - HARPS, PROGRAM, [ TRANSFER, FULL ]
-            - ESPRESSO, PROGRAM, [ TRANSFER, FULL ]
+
 
 
         :param instrument: The instrument name
@@ -178,8 +240,14 @@ class MonitoringClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.monitoring import Monitoring
-        >>> values = Monitoring.query_transfer_by_program(instrument='ESPRESSO', pipeline='TRANSFER', program='110.245W.001')
+        .. dropdown:: Getting the monitoring data for a specific program, instrument and pipeline
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+              from dace_query.monitoring import Monitoring
+              values = Monitoring.query_transfer_by_program(instrument='ESPRESSO', pipeline='TRANSFER', program='110.245W.001')
 
         """
 
@@ -203,14 +271,24 @@ class MonitoringClass:
 
 
         Available pipeline names are:
-            - ``TRANSFER``: From remote archive to Geneva archive (Transfer)
-            - ``GENEVA``: From reduction in Geneva to DACE import (Reduction and import)
-            - ``FULL``: From remote archive to DACE import (Transfer, reduction and import)
+        
+        - ``'TRANSFER'``: From remote archive to Geneva archive (Transfer)
+        - ``'GENEVA'``: From reduction in Geneva to DACE import (Reduction and import)
+        - ``'FULL'``: From remote archive to DACE import (Transfer, reduction and import)
 
-        The supported combinations are indicated below and described as ``(instrument name; target name; pipeline name)``:
-
-            - HARPS, TARGET, [ TRANSFER, FULL ]
-            - ESPRESSO, TARGET, [ TRANSFER, FULL ]
+        The supported combinations are indicated below :
+        
+        .. list-table:: Possible instrument/pipeline combinations
+            :header-rows: 1
+            
+            * - Instrument
+              - Pipeline
+              
+            * - ``'HARPS'``
+              - ``'TRANSFER'`` or ``'FULL'``
+              
+            * - ``'ESPRESSO'``
+              - ``'TRANSFER'`` or ``'FULL'``
 
         :param instrument: The instrument name
         :type instrument: str
@@ -223,8 +301,14 @@ class MonitoringClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.monitoring import Monitoring
-        >>> values = Monitoring.query_transfer_by_target(instrument='ESPRESSO', pipeline='TRANSFER', target='L 513-23')
+        .. dropdown:: Getting the monitoring data for a specific target, instrument and pipeline
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+              from dace_query.monitoring import Monitoring
+              values = Monitoring.query_transfer_by_target(instrument='ESPRESSO', pipeline='TRANSFER', target='L 513-23')
         """
 
         complete_name = f"{instrument}_{pipeline}".upper()
@@ -239,5 +323,11 @@ class MonitoringClass:
 
 Monitoring: MonitoringClass = MonitoringClass()
 """
-Monitoring instance
+This is a singleton instance of the :class:`MonitoringClass` class.
+
+To use it, simply import it :
+
+.. code-block:: python
+
+    from dace_query.monitoring import Monitoring
 """

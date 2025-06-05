@@ -16,13 +16,18 @@ ATMOSPHERIC_DEFAULT_LIMIT = 10000
 class AtmosphericSpectroscopyClass:
     """
     The atmospheric spectroscopy class.
-    Use to retrieve data from the atmospheric spectosopy module.
+    Use to retrieve data from the atmospheric spectroscopy module.
 
-    **An atmospheric spectroscopy instance is already provided, to use it :**
+    .. tip::
 
-    >>> from dace_query.atmosphericSpectroscopy import AtmosphericSpectroscopy
+        A catalog instance is already provided, to use it:
+
+        .. code-block:: python
+
+            from dace_query.atmosphericSpectroscopy import AtmosphericSpectroscopy
+
     """
-
+    
     def __init__(self, dace_instance: Optional[DaceClass] = None):
         """
         Create a configurable atmospheric spectroscopy object which uses a specified dace instance.
@@ -30,8 +35,10 @@ class AtmosphericSpectroscopyClass:
         :param dace_instance: A dace object
         :type dace_instance: DaceClass
 
-        >>> from dace_query.atmosphericSpectroscopy import AtmosphericSpectroscopyClass
-        >>> atmospheric_spectroscopy_instance = AtmosphericSpectroscopyClass()
+        .. code-block:: python
+
+            from dace_query.atmosphericSpectroscopy import AtmosphericSpectroscopyClass
+            atmospheric_spectroscopy_instance = AtmosphericSpectroscopyClass()
 
         """
         self.__OBSERVATION_API = 'obs-webapp'
@@ -77,8 +84,15 @@ class AtmosphericSpectroscopyClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.atmosphericSpectroscopy import AtmosphericSpectroscopy
-        >>> values =  AtmosphericSpectroscopy.query_database()
+        .. dropdown:: Getting the full atmospheric spectroscopy database
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.atmosphericSpectroscopy import AtmosphericSpectroscopy
+                values =  AtmosphericSpectroscopy.query_database()
+            
         """
 
         if filters is None:
@@ -99,5 +113,12 @@ class AtmosphericSpectroscopyClass:
 
 AtmosphericSpectroscopy: AtmosphericSpectroscopyClass = AtmosphericSpectroscopyClass()
 """
-Atmospheric spectroscopy instance
+
+This is a singleton instance of the :class:`AtmosphericSpectroscopyClass` class.
+
+To use it, simply import it :
+
+.. code-block:: python
+
+    from dace_query.atmosphericSpectroscopy import AtmosphericSpectroscopy
 """

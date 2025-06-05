@@ -18,9 +18,13 @@ class MoleculeClass:
     The molecule class.
     Use to retrieve data from the molecule module.
 
-    **A molecule instance is already provided, to use it :**
+    .. tip::
+    
+        A molecule instance is already provided, to use it:
 
-    >>> from dace_query.opacity import Molecule
+        .. code-block:: python
+
+            from dace_query.opacity import Molecule
 
     """
 
@@ -31,8 +35,11 @@ class MoleculeClass:
         :param dace_instance: a dace object
         :type dace_instance: Optional[DaceClass]
 
-        >>> from dace_query.opacity import MoleculeClass
-        >>> molecule_instance = MoleculeClass()
+
+            .. code-block:: python
+        
+            from dace_query.opacity import MoleculeClass
+            molecule_instance = MoleculeClass()
         """
 
         self.__OPACITY_API = 'opa-webapp'
@@ -77,8 +84,14 @@ class MoleculeClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.opacity import Molecule
-        >>> values = Molecule.query_database()
+        .. dropdown:: Getting all data from the molecule database
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.opacity import Molecule
+                values = Molecule.query_database()
         """
         if filters is None:
             filters = {}
@@ -121,8 +134,14 @@ class MoleculeClass:
         :type output_filename: Optional[str]
         :return: None
 
-        >>> from dace_query.opacity import Molecule
-        >>> # Molecule.download('1H2-16O', 'POKAZATEL', 1.0, (2500, 2600), (2.5, 3), output_directory='/tmp', output_filename='test_molecule.tar.gz')
+        .. dropdown:: Downloading a specific molecule
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.opacity import Molecule
+                Molecule.download('1H2-16O', 'POKAZATEL', 1.0, (2500, 2600), (2.5, 3), output_directory='/tmp', output_filename='test_molecule.tar.gz')
         """
 
         self.dace.download_file(
@@ -163,8 +182,14 @@ class MoleculeClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.opacity import Molecule
-        >>> values = Molecule.get_data('1H2-16O', 'POKAZATEL', 1.0, 300, -1.33)
+        .. dropdown:: Getting data for a specific molecule
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.opacity import Molecule
+                values = Molecule.get_data('1H2-16O', 'POKAZATEL', 1.0, 300, -1.33)
         """
         return self.dace.transform_to_format(
             self.dace.request_get(
@@ -207,8 +232,14 @@ class MoleculeClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.opacity import Molecule
-        >>> values =  Molecule.get_high_resolution_data('1H2-16O', 'POKAZATEL', 1.0, 300, -1.33, (1.01, 3.02))
+        .. dropdown:: Getting high resolution data for a specific molecule
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.opacity import Molecule
+                values =  Molecule.get_high_resolution_data('1H2-16O', 'POKAZATEL', 1.0, 300, -1.33, (1.01, 3.02))
         """
         return self.dace.transform_to_format(
             self.dace.request_get(
@@ -251,8 +282,14 @@ class MoleculeClass:
         :type output_filename: Optional[str]
         :return: None
 
-        >>> from dace_query.opacity import Molecule
-        >>> # Molecule.interpolate('1H2-16O', 'POKAZATEL', 1.0, [110], [0.4], output_directory='/tmp', output_filename='opacity_molecule_interpolate.tar.gz')
+        .. dropdown:: Computing interpolation for a specific molecule
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.opacity import Molecule
+                Molecule.interpolate('1H2-16O', 'POKAZATEL', 1.0, [110], [0.4], output_directory='/tmp', output_filename='opacity_molecule_interpolate.tar.gz')
 
         """
         download_response = self.dace.request_post(
@@ -278,4 +315,12 @@ class MoleculeClass:
 
 
 Molecule: MoleculeClass = MoleculeClass()
-"""Molecule instance"""
+"""
+This is a singleton instance of the :class:`MoleculeClass` class.
+
+To use it, simply import it :
+
+.. code-block:: python
+
+    from dace_query.opacity import Molecule
+"""

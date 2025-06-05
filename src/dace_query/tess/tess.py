@@ -19,9 +19,13 @@ class TessClass:
     The tess class.
     Use to retrieve data from the tess module.
 
-    **A tess instance is already provided, to use it :**
-
-    >>> from dace_query.tess import Tess
+    .. tip::
+    
+        A tess instance is already provided, to use it:
+        
+        .. code-block:: python
+        
+            from dace_query.tess import Tess
     """
 
     def __init__(self, dace_instance: Optional[DaceClass] = None):
@@ -31,8 +35,10 @@ class TessClass:
         :param dace_instance: A dace object
         :type dace_instance: Optional[DaceClass]
 
-        >>> from dace_query.tess import TessClass
-        >>> tess_instance = TessClass()
+        .. code-block:: python
+
+            from dace_query.tess import TessClass
+            tess_instance = TessClass()
         """
         self.__TESS_API = 'tess-webapp'
 
@@ -76,8 +82,14 @@ class TessClass:
         :return: A dict containing lists of values for each visit
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.tess import Tess
-        >>> values = Tess.query_database()
+        .. dropdown:: Getting all available observations
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+
+                from dace_query.tess import Tess
+                values = Tess.query_database()
         """
         if filters is None:
             filters = {}
@@ -95,13 +107,114 @@ class TessClass:
                 }
             ), output_format=output_format
         )
+    
+    
+    def query_toi_catalog(self,
+                    limit: Optional[int] = TESS_DEFAULT_LIMIT,
+                    filters: Optional[dict] = None,
+                    sort: Optional[dict] = None,
+                    output_format: Optional[str] = None) -> Union[dict[str, ndarray], DataFrame, Table, dict]:
+        """
+        Query the Tess Object of Interest (TOI) catalog to retrieve data in the chosen format.
+
+        Filters and sorting order can be applied to the query via named arguments (see :doc:`query_options`).
+
+        All available formats are defined in this section (see :doc:`output_format`).
+
+        :param limit: Maximum number of rows to return
+        :type limit: Optional[int]
+        :param filters: Filters to apply to the query
+        :type filters: Optional[dict]
+        :param sort: Sort order to apply to the query
+        :type sort: Optional[dict]
+        :param output_format: The desired data in the chosen output format
+        :type output_format: Optional[str]
+        :return: A dict containing lists of values for each target in the TOI catalog
+        :rtype: dict[str, ndarray] or DataFrame or Table or dict
+
+        .. dropdown:: Getting the TOI catalog
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+
+                from dace_query.tess import Tess
+                values = Tess.query_toi_catalog()
+        """
+        if filters is None:
+            filters = {}
+        if sort is None:
+            sort = {}
+
+        return self.dace.transform_to_format(
+            self.dace.request_get(
+                api_name=self.__TESS_API,
+                endpoint='catalog/toi',
+                params={
+                    'limit': str(limit),
+                    'filters': json.dumps(filters),
+                    'sort': json.dumps(sort)
+                }
+            ), output_format=output_format
+        )
+
+
+    def query_tic_catalog(self,
+                    limit: Optional[int] = TESS_DEFAULT_LIMIT,
+                    filters: Optional[dict] = None,
+                    sort: Optional[dict] = None,
+                    output_format: Optional[str] = None) -> Union[dict[str, ndarray], DataFrame, Table, dict]:
+        """
+        Query the Tess Input Catalog (TIC) to retrieve data in the chosen format.
+
+        Filters and sorting order can be applied to the query via named arguments (see :doc:`query_options`).
+
+        All available formats are defined in this section (see :doc:`output_format`).
+
+        :param limit: Maximum number of rows to return
+        :type limit: Optional[int]
+        :param filters: Filters to apply to the query
+        :type filters: Optional[dict]
+        :param sort: Sort order to apply to the query
+        :type sort: Optional[dict]
+        :param output_format: The desired data in the chosen output format
+        :type output_format: Optional[str]
+        :return: A dict containing lists of values for each target in the TIC
+        :rtype: dict[str, ndarray] or DataFrame or Table or dict
+
+        .. dropdown:: Getting the TIC catalog
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+
+                from dace_query.tess import Tess
+                values = Tess.query_tic_catalog()
+        """
+        if filters is None:
+            filters = {}
+        if sort is None:
+            sort = {}
+
+        return self.dace.transform_to_format(
+            self.dace.request_get(
+                api_name=self.__TESS_API,
+                endpoint='catalog/tic',
+                params={
+                    'limit': str(limit),
+                    'filters': json.dumps(filters),
+                    'sort': json.dumps(sort)
+                }
+            ), output_format=output_format
+        )
 
     def query_region(self,
                      sky_coord: SkyCoord,
                      angle: Angle,
                      limit: Optional[int] = TESS_DEFAULT_LIMIT,
                      filters: Optional[dict] = None,
-                     output_format: Optional[str] = None) -> Union[dict[str, ndarray], DataFrame, Table, dict]:
+                     output_format: Optional[str] = None,
+                     catalog: Optional[str] = None)-> Union[dict[str, ndarray], DataFrame, Table, dict]:
         """
         Query a region, based on SkyCoord and Angle objects, in the tess database and retrieve data in the chosen
         format.
@@ -120,14 +233,33 @@ class TessClass:
         :type filters: Optional[dict]
         :param output_format: Type of data returns
         :type output_format: Optional[str]
+        :param catalog: Allows to search in a specific catalog instead of the tess observation database (can be ``'TIC'`` or ``'TOI'``)
+        :type catalog: Optional[str]
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.tess import Tess
-        >>> from astropy.coordinates import SkyCoord, Angle
-        >>> sky, a = SkyCoord('13h50m24s', '-60d21m11s', frame='icrs'), Angle('0.005d')
-        >>> values = Tess.query_region(sky_coord=sky, angle=a)
 
+        .. dropdown:: Finding observations using a cone search
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+
+                from dace_query.tess import Tess
+                from astropy.coordinates import SkyCoord, Angle
+                sky, a = SkyCoord('13h50m24s', '-60d21m11s', frame='icrs'), Angle('0.005d')
+                values = Tess.query_region(sky_coord=sky, angle=a)
+                
+        .. dropdown:: Finding targets in the TOI catalog using a cone search
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+
+                from dace_query.tess import Tess
+                from astropy.coordinates import SkyCoord, Angle
+                sky, a = SkyCoord('13h50m24s', '-60d21m11s', frame='icrs'), Angle('0.005d')
+                values = Tess.query_region(sky_coord=sky, angle=a, catalog='TOI')
         """
 
         coordinate_filter_dict = self.dace.transform_coordinates_to_dict(sky_coord, angle)
@@ -135,7 +267,16 @@ class TessClass:
         if filters is not None:
             filters_with_coordinates.update(filters)
         filters_with_coordinates.update(coordinate_filter_dict)
-        return self.query_database(limit=limit, filters=filters_with_coordinates, output_format=output_format)
+        
+        if catalog is not None:
+            if 'TIC' in catalog.upper():
+                return self.query_tic_catalog(limit=limit, filters=filters_with_coordinates, output_format=output_format)
+            elif 'TOI' in catalog.upper():
+                return self.query_toi_catalog(limit=limit, filters=filters_with_coordinates, output_format=output_format)
+            else:
+                raise ValueError("Catalog must be 'TIC' or 'TOI'")
+        else:
+            return self.query_database(limit=limit, filters=filters_with_coordinates, output_format=output_format)
 
     def get_flux(self,
                  target: str,
@@ -149,7 +290,7 @@ class TessClass:
 
         Avalable flux types are [ 'raw_flux', 'corr_flux' ].
 
-        :param target: The target to retrieve data from.
+        :param target: The target to retrieve data from. (usually a TIC or TOI id)
         :type target: str
         :param flux_type: The flux type to use
         :type flux_type: Optional[str]
@@ -158,9 +299,15 @@ class TessClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.tess import Tess
-        >>> target_to_search = 'TIC381400181'
-        >>> values = Tess.get_flux(target=target_to_search)
+        .. dropdown:: Getting flux data for a given target
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.tess import Tess
+                target_to_search = 'TIC381400181'
+                values = Tess.get_flux(target=target_to_search)
         """
         options: dict = {
             "fluxType": flux_type,
@@ -192,4 +339,12 @@ class TessClass:
 
 
 Tess: TessClass = TessClass()
-"""Tess instance"""
+"""
+This is a singleton instance of the :class:`TessClass` class.
+
+To use it, simply import it :
+
+.. code-block:: python
+
+    from dace_query.tess import Tess
+"""

@@ -1,21 +1,9 @@
-dace\_query.monitoring package
+:html_theme.sidebar_secondary.remove:
+
+Monitoring
 ==============================
 
-Submodules
-----------
-
-dace\_query.monitoring.monitoring module
-----------------------------------------
-
 .. automodule:: dace_query.monitoring.monitoring
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: dace_query.monitoring
    :members:
    :undoc-members:
    :show-inheritance:

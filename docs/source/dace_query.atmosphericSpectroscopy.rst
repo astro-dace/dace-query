@@ -1,21 +1,9 @@
-dace\_query.atmosphericSpectroscopy package
-===========================================
+:html_theme.sidebar_secondary.remove:
 
-Submodules
-----------
-
-dace\_query.atmosphericSpectroscopy.atmosphericSpectroscopy module
-------------------------------------------------------------------
+Atmospheric spectroscopy
+========================
 
 .. automodule:: dace_query.atmosphericSpectroscopy.atmosphericSpectroscopy
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: dace_query.atmosphericSpectroscopy
    :members:
    :undoc-members:
    :show-inheritance:

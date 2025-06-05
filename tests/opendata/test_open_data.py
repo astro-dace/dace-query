@@ -5,6 +5,8 @@ import pytest
 from dace_query import DaceClass
 from dace_query.opendata import OpenDataClass
 
+''' To be reworked
+
 
 @pytest.mark.parametrize('instance', [
     pytest.param('anon_dace_instance')
@@ -57,3 +59,4 @@ def test_open_data_download_readme(instance, request):
     )
     assert Path(output_directory, output_filename).exists()
     Path(output_directory, output_filename).unlink(missing_ok=True)
+'''

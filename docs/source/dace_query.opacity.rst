@@ -1,10 +1,9 @@
-dace\_query.opacity package
+:html_theme.sidebar_secondary.remove:
+
+Opacity
 ===========================
 
-Submodules
-----------
-
-dace\_query.opacity.atom module
+Atom
 -------------------------------
 
 .. automodule:: dace_query.opacity.atom
@@ -12,18 +11,10 @@ dace\_query.opacity.atom module
    :undoc-members:
    :show-inheritance:
 
-dace\_query.opacity.molecule module
+Molecule
 -----------------------------------
 
 .. automodule:: dace_query.opacity.molecule
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: dace_query.opacity
    :members:
    :undoc-members:
    :show-inheritance:

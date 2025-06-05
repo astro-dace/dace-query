@@ -18,14 +18,18 @@ class PopulationClass:
     The population class.
     Use to retrieve data from the population module.
 
-    **A population instance is already provided, to use it:**
+    .. tip::
+    
+        A population instance is already provided, to use it:
 
-    >>> from dace_query.population import Population
+        .. code-block:: python
+
+            from dace_query.population import Population
     """
 
-    SNAPSHOTS_DEFAULT_COLUMN = ['system_id', 'planet_id', 'total_mass', 'semi_major_axis']
+    __SNAPSHOTS_DEFAULT_COLUMN = ['system_id', 'planet_id', 'total_mass', 'semi_major_axis']
     """Snapshot parameters retrieved by default"""
-    SIMULATIONS_DEFAULT_COLUMN = ['total_mass', 'semi_major_axis']
+    __SIMULATIONS_DEFAULT_COLUMN = ['total_mass', 'semi_major_axis']
     """Simulation parameters retrieved by default"""
 
     def __init__(self, dace_instance: Optional[DaceClass] = None):
@@ -35,8 +39,10 @@ class PopulationClass:
         :param dace_instance: A dace object
         :type dace_instance: Optional[DaceClass]
 
-        >>> from dace_query.population import PopulationClass
-        >>> population_instance = PopulationClass()
+        .. code-block:: python
+
+            from dace_query.population import PopulationClass
+            population_instance = PopulationClass()
         """
         self.__POPULATION_API = 'evo-webapp'
 
@@ -80,8 +86,14 @@ class PopulationClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.population import Population
-        >>> values = Population.query_database()
+        .. dropdown:: Getting all population data
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.population import Population
+                values = Population.query_database()
 
         """
         if filters is None:
@@ -115,9 +127,11 @@ class PopulationClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.population import Population
-        >>> population_to_search = 'ng96'
-        >>> values = Population.get_columns('ng96')
+        .. code-block:: python
+
+            from dace_query.population import Population
+            population_to_search = 'ng96'
+            values = Population.get_columns('ng96')
         """
 
         return self.dace.transform_to_format(
@@ -149,14 +163,20 @@ class PopulationClass:
         :return: The desired data in chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.population import Population
-        >>> population_id = 'ng96'
-        >>> years = '5000000'
-        >>> columns_to_retrieve = ['system_id', 'planet_id', 'total_mass']
-        >>> values = Population.get_snapshots(population_id=population_id, years=years, columns=columns_to_retrieve)
+        .. dropdown:: Getting the snapshots for a specific population at a specific age
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+        
+                from dace_query.population import Population
+                population_id = 'ng96'
+                years = '5000000'
+                columns_to_retrieve = ['system_id', 'planet_id', 'total_mass']
+                values = Population.get_snapshots(population_id=population_id, years=years, columns=columns_to_retrieve)
         """
         if columns is None:
-            columns = self.SNAPSHOTS_DEFAULT_COLUMN
+            columns = self.__SNAPSHOTS_DEFAULT_COLUMN
         return self.dace.transform_to_format(
             self.dace.request_get(
                 api_name=self.__POPULATION_API,
@@ -173,8 +193,14 @@ class PopulationClass:
         :return: All existing ages
         :rtype: list[str]
 
-        >>> from dace_query.population import Population
-        >>> ages = Population.get_snapshot_ages()
+        .. dropdown:: Getting all snapshot ages
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.population import Population
+                ages = Population.get_snapshot_ages()
         """
 
         snapshot_ages = []
@@ -209,14 +235,20 @@ class PopulationClass:
         :type output_format: Optional[str]
         :return: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.population import Population
-        >>> pop_id, planet_id, system_id = 'ng96', 1, 1
-        >>> parameters_to_retrieve = ['time_yr', 'total_mass']
-        >>> values = Population.get_track(population_id=pop_id, system_id=system_id, planet_id=planet_id, columns=parameters_to_retrieve)
+        .. dropdown:: Getting the tracks for a specific population, system and planet
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.population import Population
+                pop_id, planet_id, system_id = 'ng96', 1, 1
+                parameters_to_retrieve = ['time_yr', 'total_mass']
+                values = Population.get_track(population_id=pop_id, system_id=system_id, planet_id=planet_id, columns=parameters_to_retrieve)
 
         """
         if columns is None:
-            columns = self.SIMULATIONS_DEFAULT_COLUMN
+            columns = self.__SIMULATIONS_DEFAULT_COLUMN
         return self.dace.transform_to_format(
             self.dace.request_get(
                 api_name=self.__POPULATION_API,
@@ -227,4 +259,12 @@ class PopulationClass:
 
 
 Population: PopulationClass = PopulationClass()
-"""Population instance"""
+"""
+This is a singleton instance of the :class:`PopulationClass` class.
+
+To use it, simply import it :
+
+.. code-block:: python
+
+    from dace_query.population import Population
+"""

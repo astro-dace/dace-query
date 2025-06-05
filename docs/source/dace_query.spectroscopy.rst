@@ -1,21 +1,9 @@
-dace\_query.spectroscopy package
+:html_theme.sidebar_secondary.remove:
+
+Spectroscopy
 ================================
 
-Submodules
-----------
-
-dace\_query.spectroscopy.spectroscopy module
---------------------------------------------
-
 .. automodule:: dace_query.spectroscopy.spectroscopy
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: dace_query.spectroscopy
    :members:
    :undoc-members:
    :show-inheritance:

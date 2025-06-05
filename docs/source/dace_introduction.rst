@@ -1,13 +1,9 @@
-Introduction
-############
-
-Description
-***********
-The dace-query package lets easily query DACE and access public and private data using a simple utility tool.
+Getting started
+#################
 
 Installation
-************
-
+***************
+The dace-query package lets easily query DACE and access public and private data using a simple utility tool.
 The dace-query package is available on PyPi and can be installed using `pip <https://pypi.org/project/pip/>`_ or `conda <https://www.anaconda.com>`_ :
 
 
@@ -40,7 +36,7 @@ Make sure the package is installed correctly :
     help(dace_query)
 
 Authentication
-**************
+***************
 
 In order to access the private data of DACE, an authentication system has been implemented.
 This one works very simply, it just requires three things detailed in the following subsections:
@@ -77,7 +73,7 @@ To obtain an API key:
 .. _dacerc:
 
 The .dacerc file
-================
+=========================
 The **.dacerc** file, (**you have to create it**), located by default in the home directory (~/.dacerc) and in TOML
 format, defines a user section with a key-value pair specifying the user's API key (see below).
 
@@ -99,8 +95,8 @@ To create the .dacerc file on Linux or macOs, open a terminal window and type :
 
     printf '[user]\nkey = apiKey:%s\n' "your-api-key-here" > ~/.dacerc
 
-Quickstart
-**********
+Example usage
+**************
 
 .. code-block:: python
 
@@ -120,18 +116,13 @@ Quickstart
 For more examples of uses, such as **filtering bad quality data** (see :doc:`usage_examples`)
 
 Contact
-*******
+********
 
 In case of questions, proposals or problems, feel free to contact the `DACE support <mailto:dace-support@unige.ch>`_ .
 
 Links
-*****
+********
 * `DACE website <https://dace.unige.ch>`_
+* :doc:`changelogs`
 
-Changelogs
-**********
 
-.. toctree::
-   :maxdepth: 2
-
-   changelogs

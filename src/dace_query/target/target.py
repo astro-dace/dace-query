@@ -18,9 +18,13 @@ class TargetClass:
     The target class.
     Use to retrieve data from the target module.
 
-    **A target instance is already provided, to use it :**
-
-    >>> from dace_query.target import Target
+    .. tip::
+    
+        A target instance is already provided, to use it:
+        
+        .. code-block:: python
+        
+            from dace_query.target import Target
     """
 
     def __init__(self, dace_instance: Optional[DaceClass] = None):
@@ -30,8 +34,10 @@ class TargetClass:
         :param dace_instance: A dace object
         :type dace_instance: Optional[DaceClass]
 
-        >>> from dace_query.target import TargetClass
-        >>> target_instance = TargetClass()
+        .. code-block:: python
+
+            from dace_query.target import TargetClass
+            target_instance = TargetClass()
 
         """
 
@@ -77,8 +83,14 @@ class TargetClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.target import Target
-        >>> values = Target.query_database()
+        .. dropdown:: Getting all data from the target database
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+            
+                from dace_query.target import Target
+                values = Target.query_database()
         """
         if filters is None:
             filters = {}
@@ -98,4 +110,12 @@ class TargetClass:
 
 
 Target: TargetClass = TargetClass()
-"""Target instance"""
+"""
+This is a singleton instance of the :class:`TargetClass` class.
+
+To use it, simply import it :
+
+.. code-block:: python
+
+    from dace_query.target import Target
+"""

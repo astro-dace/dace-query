@@ -1,8 +1,8 @@
 Usage examples
-##############
+==============
 
 Filtering bad quality data
-**************************
+--------------------------
 
 Before applying any scientific operation on the recovered data, it is important to ensure their good quality and therefore to filter out the bad ones.
 
@@ -42,7 +42,33 @@ To do so, it is necessary to check the following parameters :
         filtered_data[parameter] = values[condition]
 
 Download non common data products from a CHEOPS visit
-******************************************************
+-----------------------------------------------------
+
+
+.. versionadded:: 2.0.0
+
+    Downloading data product is now done using the new :meth:`~dace_query.cheops.cheops.CheopsClass.download` method.
+
+    By specifying the ``file_type`` parameter, you may now download specific data products for CHEOPS visits :
+
+    .. code-block:: python
+
+        from dace_query.cheops import Cheops
+
+        visits = Cheops.download(
+            'SCI_RAW_Attitude', 
+            {'obj_id_catname': {'equal': 'HD88111'}}, 
+            output_directory='/tmp', 
+            output_filename='cheops.tar.gz' 
+        )
+    
+    Also, the `CHEOPS module on the DACE web app <https://dace.unige.ch/cheopsDatabase>`_ has been updated so that all CHEOPS data products types can now be downloaded individually by using the 'custom' download option.
+
+
+
+.. deprecated:: 2.0.0
+
+    The following example is deprecated and will be removed in a future version of the library.
 
 On the `DACE website <https://dace.unige.ch>`_, several data products per visit can be downloaded, such as light curves, images or many other types of files already defined.
 

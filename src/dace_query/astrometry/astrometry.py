@@ -7,7 +7,7 @@ import logging
 from typing import Optional, Union
 
 from astropy.table import Table
-from astroquery.simbad import Simbad
+from astroquery.simbad import SimbadClass
 from numpy import ndarray
 from pandas import DataFrame
 
@@ -21,14 +21,17 @@ class AstrometryClass:
     The astrometry class.
     Use to retrieve data from the astrometry module.
 
-    An astrometry instance is already provided, to use it:
 
-    .. code-block:: python
+    .. tip::
+    
+        A catalog instance is already provided, to use it:
 
-        from dace_query.astrometry import Astrometry
+        .. code-block:: python
+
+            from dace_query.astrometry import Astrometry
 
     """
-
+    
     def __init__(self, dace_instance: Optional[DaceClass] = None):
         """
         Create a configurable astrometry object which uses a specified dace instance.
@@ -85,15 +88,14 @@ class AstrometryClass:
             raise TypeError("The identifier must be a string.")
 
         # Query SIMBAD
-        custom_simbad = Simbad()
-        custom_simbad.add_votable_fields("ids")
-        result = custom_simbad.query_object(id)
+        custom_simbad = SimbadClass()
+        result = custom_simbad.query_objectids(id)
 
         if result is None:
             raise ValueError(f"No object found for the given identifier: {id}")
 
         # Extract all identifiers
-        all_ids = result["ids"][0].split("|")
+        all_ids = result["id"]
 
         # Check for HIP id
         hip_ids = [i for i in all_ids if i.startswith("HIP ")]
@@ -122,101 +124,110 @@ class AstrometryClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        Column descriptions
-        -------------------
+        .. dropdown:: Column descriptions
+            :color: info
+            :icon: list-unordered
 
-        - **hip** (*-*): Hipparcos identifier.
 
-        - **mce** (*-*): Main-catalogue entry.
+            - ``hip`` (*-*): Hipparcos identifier.
 
-        - **nres** (*-*): Number of residual records.
+            - ``mce`` (*-*): Main-catalogue entry.
 
-        - **nc** (*-*): Number of components.
+            - ``nres`` (*-*): Number of residual records.
 
-        - **isol_n** (*-*): Solution type.
+            - ``nc`` (*-*): Number of components.
 
-        - **sce** (*-*): Supplement-catalogue entry.
+            - ``isol_n`` (*-*): Solution type.
 
-        - **f2** (*-*): Goodness of fit.
+            - ``sce`` (*-*): Supplement-catalogue entry.
 
-        - **f1** (*-*): Percentage of rejected observations.
+            - ``f2`` (*-*): Goodness of fit.
 
-        - **hp** (*mag*): Hp magnitude.
+            - ``f1`` (*-*): Percentage of rejected observations.
 
-        - **bmv** (*mag*): B-V colour index.
+            - ``hp`` (*mag*): Hp magnitude.
 
-        - **varann** (*-*): Reference to variability annex.
+            - ``bmv`` (*mag*): B-V colour index.
 
-        - **nob** (*-*): Number of observations.
+            - ``varann`` (*-*): Reference to variability annex.
 
-        - **nr** (*-*): Number of rejected observations.
+            - ``nob`` (*-*): Number of observations.
 
-        - **radeg** (*deg.*): Right Ascension.
+            - ``nr`` (*-*): Number of rejected observations.
 
-        - **dedeg** (*deg.*): Declination.
+            - ``radeg`` (*deg.*): Right Ascension.
 
-        - **plx** (*mas*): Parallax.
+            - ``dedeg`` (*deg.*): Declination.
 
-        - **pm_ra** (*mas/yr*): Proper motion in Right Ascension.
+            - ``plx`` (*mas*): Parallax.
 
-        - **pm_de** (*mas/yr*): Proper motion in Declination.
+            - ``pm_ra`` (*mas/yr*): Proper motion in Right Ascension.
 
-        - **e_ra** (*mas*): Formal error on RAdeg.
+            - ``pm_de`` (*mas/yr*): Proper motion in Declination.
 
-        - **e_de** (*mas*): Formal error on DEdeg.
+            - ``e_ra`` (*mas*): Formal error on RAdeg.
 
-        - **e_plx** (*mas*): Formal error on Plx.
+            - ``e_de`` (*mas*): Formal error on DEdeg.
 
-        - **e_pmra** (*mas/yr*): Formal error on pmRA.
+            - ``e_plx`` (*mas*): Formal error on Plx.
 
-        - **e_pmde** (*mas/yr*): Formal error on pmDE.
+            - ``e_pmra`` (*mas/yr*): Formal error on pmRA.
 
-        - **dpmra** (*mas/yr²*): Acceleration in Right Ascension (7p, 9p).
+            - ``e_pmde`` (*mas/yr*): Formal error on pmDE.
 
-        - **dpmde** (*mas/yr²*): Acceleration in Declination (7p, 9p).
+            - ``dpmra`` (*mas/yr²*): Acceleration in Right Ascension (7p, 9p).
 
-        - **e_dpmra** (*mas/yr²*): Formal error on dpmRA (7p, 9p).
+            - ``dpmde`` (*mas/yr²*): Acceleration in Declination (7p, 9p).
 
-        - **e_dpmde** (*mas/yr²*): Formal error on dpmDE (7p, 9p).
+            - ``e_dpmra`` (*mas/yr²*): Formal error on dpmRA (7p, 9p).
 
-        - **ddpmra** (*mas/yr³*): Acceleration change in Right Ascension (9p).
+            - ``e_dpmde`` (*mas/yr²*): Formal error on dpmDE (7p, 9p).
 
-        - **ddpmde** (*mas/yr³*): Acceleration change in Declination (9p).
+            - ``ddpmra`` (*mas/yr³*): Acceleration change in Right Ascension (9p).
 
-        - **e_ddpmra** (*mas/yr³*): Formal error on ddpmRA (9p).
+            - ``ddpmde`` (*mas/yr³*): Acceleration change in Declination (9p).
 
-        - **e_ddpmde** (*mas/yr³*): Formal error on ddpmDE (9p).
+            - ``e_ddpmra`` (*mas/yr³*): Formal error on ddpmRA (9p).
 
-        - **upsra** (*mas*): VIM in Right Ascension (VIM).
+            - ``e_ddpmde`` (*mas/yr³*): Formal error on ddpmDE (9p).
 
-        - **upsde** (*mas*): VIM in Declination (VIM).
+            - ``upsra`` (*mas*): VIM in Right Ascension (VIM).
 
-        - **e_upsra** (*mas*): Formal error on upsRA (VIM).
+            - ``upsde`` (*mas*): VIM in Declination (VIM).
 
-        - **e_upsde** (*mas*): Formal error on upsDE (VIM).
+            - ``e_upsra`` (*mas*): Formal error on upsRA (VIM).
 
-        - **var** (*mas*): Cosmic dispersion added (stochastic).
+            - ``e_upsde`` (*mas*): Formal error on upsDE (VIM).
 
-        - **gaia_gaiadr3_id** (*-*): Gaia DR3 ID as matched by Gaia.
+            - ``var`` (*mas*): Cosmic dispersion added (stochastic).
 
-        - **simbad_gaiadr3_id** (*-*): Gaia DR3 ID as matched by SIMBAD.
+            - ``gaia_gaiadr3_id`` (*-*): Gaia DR3 ID as matched by Gaia.
 
-        - **gaiadr3_id_conflict** (*-*): Indicates if there is a conflict in Gaia DR3 ID between sources.
+            - ``simbad_gaiadr3_id`` (*-*): Gaia DR3 ID as matched by SIMBAD.
 
-        - **iad_source** (*-*): Indicates the source of the IAD, either "Brandt2021" or "JavaTool".
+            - ``gaiadr3_id_conflict`` (*-*): Indicates if there is a conflict in Gaia DR3 ID between sources.
 
-        Example
-        -------
+            - ``iad_source`` (*-*): Indicates the source of the IAD, either "Brandt2021" or "JavaTool".
 
-        .. code-block:: python
 
-            from dace.astrometry import Astrometry
+        .. dropdown:: Querying the Hipparcos database with a Hipparcos identifier
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
 
-            # Query the Hipparcos database with a Hipparcos identifier
-            Astrometry.query_hipparcos_database('HIP 1000', output_format='pandas')
+                from dace.astrometry import Astrometry
+                Astrometry.query_hipparcos_database('HIP 1000', output_format='pandas')
+                
+                
+        .. dropdown:: Querying the Hipparcos database with a Gaia DR3 identifier
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
 
-            # Query the Hipparcos database with a Gaia DR3 identifier
-            Astrometry.query_hipparcos_database('Gaia DR3 2361372542600289664', output_format='pandas')
+                from dace.astrometry import Astrometry
+                Astrometry.query_hipparcos_database('Gaia DR3 2361372542600289664', output_format='pandas')
         """
         # Query simbad to get the HIP or Gaia DR3 id
         catalog, id_number = self._simbad_id_check(id)
@@ -248,44 +259,52 @@ class AstrometryClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        Column descriptions
-        -------------------
+        .. dropdown:: Column descriptions
+            :color: info
+            :icon: list-unordered
 
-        - **IORB** (*-*): Orbit number.
+            - ``IORB`` (*-*): Orbit number.
 
-        - **EPOCH** (*years*): Observation epoch, given as Year - 1991.25.
+            - ``EPOCH`` (*years*): Observation epoch, given as Year - 1991.25.
 
-        - **PARF** (*-*): Parallax factor.
+            - ``PARF`` (*-*): Parallax factor.
 
-        - **CPSI** (*-*): Cosine of Psi.
+            - ``CPSI`` (*-*): Cosine of Psi.
 
-        - **SPSI** (*-*): Sine of Psi.
+            - ``SPSI`` (*-*): Sine of Psi.
 
-        - **RES** (*mas*): Abscissa residual.
+            - ``RES`` (*mas*): Abscissa residual.
 
-        - **SRES** (*mas*): Formal error on abscissa residual.
+            - ``SRES`` (*mas*): Formal error on abscissa residual.
 
-        - **HIP** (*-*): Hipparcos identifier.
+            - ``HIP`` (*-*): Hipparcos identifier.
 
-        - **T_BJD** (*days*): Epoch in Barycentric Julian Date (BJD).
+            - ``T_BJD`` (*days*): Epoch in Barycentric Julian Date (BJD).
 
-        - **S_MAS** (*mas*): Absolute astrometric signal, RES + fitted model.
+            - ``S_MAS`` (*mas*): Absolute astrometric signal, RES + fitted model.
 
-        - **CTH** (*-*): Cosine of the theta angle, following Gaia convention.
+            - ``CTH`` (*-*): Cosine of the theta angle, following Gaia convention.
 
-        - **STH** (*-*): Sine of the theta angle, following Gaia convention.
+            - ``STH`` (*-*): Sine of the theta angle, following Gaia convention.
 
-        - **IAD_SOURCE** (*-*): Indicates the source of the IAD, either "Brandt2021" or "JavaTool".
+            - ``IAD_SOURCE`` (*-*): Indicates the source of the IAD, either "Brandt2021" or "JavaTool".
 
-        Example
-        -------
 
-        .. code-block:: python
+        .. dropdown:: Getting the hipparcos timeseries for a specific target
+            :color: success
+            :icon: code-square
 
-            from dace.astrometry import Astrometry
-            Astrometry.get_hipparcos_timeseries("HIP 1000", output_format='pandas')
+            .. code-block:: python
 
+                from dace.astrometry import Astrometry
+                Astrometry.get_hipparcos_timeseries("HIP 1000", output_format='pandas')
         """
+
+        if id is None:
+            raise ValueError("Please provide either a HIP id or a Gaia DR3 id.")
+
+        if not isinstance(id, str):
+            raise TypeError("The identifier must be a string.")
 
         # Query simbad to get the HIP or Gaia DR3 id
         catalog, id_number = self._simbad_id_check(id)
@@ -329,10 +348,14 @@ class AstrometryClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        .. code-block:: python
+        .. dropdown:: Getting the full astrometry database
+            :color: success
+            :icon: code-square
 
-            from dace_query.astrometry import Astrometry
-            values = Astrometry.query_database()
+            .. code-block:: python
+
+                from dace_query.astrometry import Astrometry
+                values = Astrometry.query_database()
         """
 
         if filters is None:
@@ -368,12 +391,15 @@ class AstrometryClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        .. code-block:: python
+        .. dropdown:: Getting Gaia timeseries for a specific target.
+            :color: success
+            :icon: code-square
 
-            from dace_query.astrometry import Astrometry
-            target_to_search = 'your-target'
-            values = Astrometry.get_gaia_timeseries(target=target_to_search)
+            .. code-block:: python
 
+                from dace_query.astrometry import Astrometry
+                target_to_search = 'your-target'
+                values = Astrometry.get_gaia_timeseries(target=target_to_search)
         """
 
         return self.dace.transform_to_format(
@@ -387,5 +413,11 @@ class AstrometryClass:
 
 Astrometry: AstrometryClass = AstrometryClass()
 """
-Astrometry instance
+This is a singleton instance of the :class:`AstrometryClass` class.
+
+To use it, simply import it :
+
+.. code-block:: python
+
+    from dace_query.astrometry import Astrometry
 """
