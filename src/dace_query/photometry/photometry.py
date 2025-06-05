@@ -19,9 +19,13 @@ class PhotometryClass:
     The photometry class.
     Use to retrieve data from the photometry database.
 
-    **A photometry instance is already provided, to use it:**
+    .. tip::
+    
+        A photometry instance is already provided, to use it:
 
-    >>> from dace_query.photometry import Photometry
+        .. code-block:: python
+
+            from dace_query.photometry import Photometry
     """
     __ACCEPTED_FILE_TYPES = ['s1d', 's2d', 'ccf', 'bis', 'all']
 
@@ -32,8 +36,10 @@ class PhotometryClass:
         :param dace_instance: A dace object
         :type dace_instance: Optional[DaceClass]
 
-        >>> from dace_query.photometry import PhotometryClass
-        >>> photometry_instance = PhotometryClass()
+        .. code-block:: python
+
+            from dace_query.photometry import PhotometryClass
+            photometry_instance = PhotometryClass()
         """
         self.__OBS_API = 'obs-webapp'
         self.__OBSERVATION_ENDPOINT = self.__OBS_API + 'observation/'
@@ -80,8 +86,14 @@ class PhotometryClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.photometry import Photometry
-        >>> values =  Photometry.query_database()
+        .. dropdown:: Getting all photometry data
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.photometry import Photometry
+                values =  Photometry.query_database()
 
         """
         if filters is None:
@@ -128,13 +140,19 @@ class PhotometryClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.photometry import Photometry
-        >>> from astropy.coordinates import SkyCoord, Angle
-        >>> sky_coord, angle = SkyCoord("11h01m04s", "+04d29m10s", frame='icrs'), Angle('0.045d')
-        >>> values = Photometry.query_region(sky_coord=sky_coord, angle=angle)
+        .. dropdown:: Searching for photometry data using a cone search
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.photometry import Photometry
+                from astropy.coordinates import SkyCoord, Angle
+                sky_coord, angle = SkyCoord("11h01m04s", "+04d29m10s", frame='icrs'), Angle('0.045d')
+                values = Photometry.query_region(sky_coord=sky_coord, angle=angle)
         """
 
-        coordinate_filter_dict = self.dace.transform_coordinates_to_dict(sky_coord, angle)
+        coordinate_filter_dict = self.dace.transform_coordinates_to_dict_old(sky_coord, angle)
         filters_with_coordinates = {}
         if filters is not None:
             filters_with_coordinates.update(filters)
@@ -150,9 +168,15 @@ class PhotometryClass:
         :return: The desired data
         :rtype: list
 
-        >>> from dace_query.photometry import Photometry
-        >>> target_to_search = "EPIC201750173"
-        >>> values = Photometry.get_timeseries(target=target_to_search)
+        .. dropdown:: Getting photometry timeseries for a target
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.photometry import Photometry
+                target_to_search = "EPIC201750173"
+                values = Photometry.get_timeseries(target=target_to_search)
         """
         result = self.dace.request_get(
             api_name=self.__OBS_API,
@@ -164,4 +188,12 @@ class PhotometryClass:
 
 
 Photometry: PhotometryClass = PhotometryClass()
-"""A photometry instance"""
+"""
+This is a singleton instance of the :class:`PhotometryClass` class.
+
+To use it, simply import it :
+
+.. code-block:: python
+
+    from dace_query.photometry import Photometry
+"""

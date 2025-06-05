@@ -1,21 +1,9 @@
-dace\_query.photometry package
+:html_theme.sidebar_secondary.remove:
+
+Photometry
 ==============================
 
-Submodules
-----------
-
-dace\_query.photometry.photometry module
-----------------------------------------
-
 .. automodule:: dace_query.photometry.photometry
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: dace_query.photometry
    :members:
    :undoc-members:
    :show-inheritance:

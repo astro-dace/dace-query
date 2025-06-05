@@ -1,21 +1,9 @@
-dace\_query.sun package
+:html_theme.sidebar_secondary.remove:
+
+Sun
 =======================
 
-Submodules
-----------
-
-dace\_query.sun.sun module
---------------------------
-
 .. automodule:: dace_query.sun.sun
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: dace_query.sun
    :members:
    :undoc-members:
    :show-inheritance:

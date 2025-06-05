@@ -18,10 +18,12 @@ from astropy.coordinates import SkyCoord, Angle
 from astropy.table import Table
 from pandas import DataFrame
 from requests import RequestException, HTTPError
+import urllib3
 
 from dace_query.__version__ import __version__, __title__, __py_version__
 
-COORDINATES_DB_COLUMN = 'obj_pos_coordinates_hms_dms'
+COORDINATES_DB_COLUMN_OLD = 'obj_pos_coordinates_hms_dms'
+COORDINATES_DB_COLUMN = 'pos'
 
 MB_SIZE = 1048576
 
@@ -131,6 +133,13 @@ class DaceClass:
     def transform_coordinates_to_dict(sky_coord: SkyCoord, angle: Angle) -> dict:
         """Internal stuff"""
         return {COORDINATES_DB_COLUMN: {'ra': sky_coord.ra.degree, 'dec': sky_coord.dec.degree,
+                                        'radius': angle.degree}}
+        
+    # TODO: remove this method when we finish pgsql migration, allows to keep backward compatibility with old API
+    @staticmethod 
+    def transform_coordinates_to_dict_old(sky_coord: SkyCoord, angle: Angle) -> dict:
+        """Internal stuff"""
+        return {COORDINATES_DB_COLUMN_OLD: {'ra': sky_coord.ra.degree, 'dec': sky_coord.dec.degree,
                                         'radius': angle.degree}}
 
     def transform_to_format(self, json_data: dict, output_format: Optional[str] = None):
@@ -276,7 +285,7 @@ class DaceClass:
         """Internal stuff"""
         try:
             if output_directory is None:
-                output_directory = Path.home()
+                output_directory = Path.cwd()
             with requests.get(self.__cfg['api'][api_name] + endpoint,
                               params=params,
                               headers=self.__prepare_request(True),
@@ -287,6 +296,34 @@ class DaceClass:
                                              response.headers['content-disposition']).replace('"', '')
                     if output_filename is None:
                         raise ValueError('Missing content-disposition. Please contact DACE support')
+                output_full_file_path = Path(output_directory, output_filename)
+                self.log.info("Downloading file on location : %s", output_full_file_path)
+                self.write_stream(output_full_file_path, response)
+                self.log.info('File downloaded on location : %s', output_full_file_path)
+        except HTTPError as err_h:
+            if err_h.response.status_code == 404:
+                self.log.error('The file is not found on DACE')
+            else:
+                self.__manage_http_errors(err_h)
+                
+    def download_static_file_from_url(self, 
+                                    url: str,
+                                    output_directory: Optional[str] = None,
+                                    output_filename: Optional[str] = None) -> None:
+        urllib3.disable_warnings() # Disable SSL warnings
+        try:
+            if output_directory is None:
+                output_directory = Path.cwd()
+            with requests.get(url, headers=self.__prepare_request(True), verify=False, stream=True) as response:
+                response.raise_for_status()
+                if output_filename is None:
+
+                    # Get the filename from the URL
+                    try:
+                        output_filename = urllib.parse.unquote(url.split('/')[-1])
+                    except IndexError:
+                        self.log.error('Invalid URL format. Unable to extract filename from URL: %s', url)
+                        raise ValueError('Invalid URL format. Please contact DACE support')
                 output_full_file_path = Path(output_directory, output_filename)
                 self.log.info("Downloading file on location : %s", output_full_file_path)
                 self.write_stream(output_full_file_path, response)

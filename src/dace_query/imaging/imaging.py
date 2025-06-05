@@ -19,9 +19,14 @@ class ImagingClass:
     The imaging class.
     Use to retrieve data from the imaging module.
 
-    **An imaging instance is already provided, to use it :**
 
-    >>> from dace_query.imaging import Imaging
+    .. tip::
+    
+        An imaging instance is already provided, to use it :
+
+        .. code-block:: python
+            
+            from dace_query.imaging import Imaging
 
     """
 
@@ -40,8 +45,10 @@ class ImagingClass:
         :param dace_instance: A dace object
         :type dace_instance: Optional[DaceClass]
 
-        >>> from dace_query.imaging import ImagingClass
-        >>> imaging_class = ImagingClass()
+        .. code-block:: python
+            
+            from dace_query.imaging import ImagingClass
+            imaging_class = ImagingClass()
         """
         self.__OBS_API = 'obs-webapp'
 
@@ -81,8 +88,14 @@ class ImagingClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.imaging import Imaging
-        >>> values = Imaging.query_database()
+        .. dropdown:: Getting all imaging data
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.imaging import Imaging
+                values = Imaging.query_database()
 
         """
 
@@ -125,14 +138,20 @@ class ImagingClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.imaging import Imaging
-        >>> from astropy.coordinates import SkyCoord, Angle
-        >>> from astropy import units as u
-        >>> sky_coord, angle = SkyCoord("02:12:20.6774","-46:48:58.9566", unit=(u.hourangle, u.deg)), Angle('0.045d')
-        >>> values = Imaging.query_region(sky_coord=sky_coord, angle=angle)
+        .. dropdown:: Finding imaging data using a cone search
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.imaging import Imaging
+                from astropy.coordinates import SkyCoord, Angle
+                from astropy import units as u
+                sky_coord, angle = SkyCoord("02:12:20.6774","-46:48:58.9566", unit=(u.hourangle, u.deg)), Angle('0.045d')
+                values = Imaging.query_region(sky_coord=sky_coord, angle=angle)
         """
 
-        coordinate_filter_dict = self.dace.transform_coordinates_to_dict(sky_coord, angle)
+        coordinate_filter_dict = self.dace.transform_coordinates_to_dict_old(sky_coord, angle)
         filters_with_coordinates = {}
         if filters is not None:
             filters_with_coordinates.update(filters)
@@ -147,15 +166,18 @@ class ImagingClass:
         """
         Download specified file type from the imaging module.
 
-        Available file types are [ 'ns', 'snr', 'dl', 'hc', 'pa', 'master', 'all' ].
+        .. dropdown:: Available file types
+            :color: info
+            :icon: list-unordered
+            :open:
 
-        * **ns :** non saturated
-        * **snr :** signal-to-noise ratio
-        * **dl :** detection limit (.rdb file)
-        * **hc :** high contrast
-        * **pa :** Parallactic angle (.rdb file)
-        * **master :** master
-        * **all :** all files
+            * ``'ns'`` : non saturated
+            * ``'snr'`` : signal-to-noise ratio
+            * ``'dl'`` : detection limit (.rdb file)
+            * ``'hc'`` : high contrast
+            * ``'pa'`` : Parallactic angle (.rdb file)
+            * ``'master'`` : master
+            * ``'all'`` : all files
 
         Filters and sorting order can be applied to the query via named arguments (see :doc:`query_options`).
 
@@ -170,9 +192,15 @@ class ImagingClass:
         :type output_filename: Optional[str]
         :return: None
 
-        >>> from dace_query.imaging import Imaging
-        >>> filters_to_use = {'file_rootpath':{'contains':'sphere/SPHERE-DRS/DRS-1.0/reduced/2018-08-19/SPHERE_IRDIS.2018-08-19T07:03:54.679_H2.fits' }}
-        >>> # Imaging.download(file_type='ns', filters=filters_to_use, output_directory='/tmp', output_filename='files.tar.gz')
+        .. dropdown:: Downloading imaging files
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.imaging import Imaging
+                filters_to_use = {'file_rootpath':{'contains':'sphere/SPHERE-DRS/DRS-1.0/reduced/2018-08-19/SPHERE_IRDIS.2018-08-19T07:03:54.679_H2.fits' }}
+                Imaging.download(file_type='ns', filters=filters_to_use, output_directory='/tmp', output_filename='files.tar.gz')
 
         """
 
@@ -210,15 +238,18 @@ class ImagingClass:
         """
         Download a certain fits imaging files specified by named arguments.
 
-        Available file types are [ 'ns', 'snr', 'dl', 'hc', 'pa', 'master', 'all' ].
+        .. dropdown:: Available file types
+            :color: info
+            :icon: list-unordered
+            :open:
 
-        * **ns :** non saturated
-        * **snr :** signal-to-noise ratio
-        * **dl :** detection limit (.rdb file)
-        * **hc :** high contrast
-        * **pa :** Parallactic angle (.rdb file)
-        * **master :** master
-        * **all :** all files
+            * ``'ns'`` : non saturated
+            * ``'snr'`` : signal-to-noise ratio
+            * ``'dl'`` : detection limit (.rdb file)
+            * ``'hc'`` : high contrast
+            * ``'pa'`` : Parallactic angle (.rdb file)
+            * ``'master'`` : master
+            * ``'all'`` : all files
 
         :param fits_file: The root fits file to download
         :type fits_file: str
@@ -230,9 +261,15 @@ class ImagingClass:
         :type output_filename: Optional[str]
         :return: None
 
-        >>> from dace_query.imaging import Imaging
-        >>> fits_file_to_download, file_type = 'sphere/SPHERE-DRS/DRS-1.0/reduced/2018-08-19/SPHERE_IRDIS.2018-08-19T07:03:54.679_H2.fits', 'hc'
-        >>> # Imaging.get_image(fits_file=fits_file_to_download, file_type=file_type, output_directory='/tmp', output_filename='imaging.fits')
+        .. dropdown:: Getting a specific imaging file
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.imaging import Imaging
+                fits_file_to_download, file_type = 'sphere/SPHERE-DRS/DRS-1.0/reduced/2018-08-19/SPHERE_IRDIS.2018-08-19T07:03:54.679_H2.fits', 'hc'
+                Imaging.get_image(fits_file=fits_file_to_download, file_type=file_type, output_directory='/tmp', output_filename='imaging.fits')
         """
 
         file_type = str(file_type).upper()
@@ -250,4 +287,13 @@ class ImagingClass:
 
 
 Imaging: ImagingClass = ImagingClass()
-"""Imaging instance"""
+"""
+
+This is a singleton instance of the :class:`ImagingClass` class.
+
+To use it, simply import it :
+
+.. code-block:: python
+
+    from dace_query.imaging import Imaging
+"""

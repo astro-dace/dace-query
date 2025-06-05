@@ -18,9 +18,13 @@ class LossyClass:
     The lossy class.
     Use to retrieve data from the lossy module.
 
-    **A lossy instance is already provided, to use it :**
+    .. tip::
+    
+        A lossy instance is already provided, to use it :
 
-    >>> from dace_query.lossy import Lossy
+        .. code-block:: python
+        
+            from dace_query.lossy import Lossy
 
     """
 
@@ -30,8 +34,10 @@ class LossyClass:
 
         :param dace_instance: Optional[DaceClass]
 
-        >>> from dace_query.lossy import LossyClass
-        >>> lossy_instance = LossyClass()
+        .. code-block:: python 
+
+            from dace_query.lossy import LossyClass
+            lossy_instance = LossyClass()
 
         """
         self.__LOSSY_API = 'lossy-webapp'
@@ -75,9 +81,15 @@ class LossyClass:
         :type output_format: Optional[str]
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
+        
+        .. dropdown:: Getting all data from the lossy database
+            :color: success
+            :icon: code-square
 
-        >>> from dace_query.lossy import Lossy
-        >>> values = Lossy.query_database()
+            .. code-block:: python
+            
+                from dace_query.lossy import Lossy
+                values = Lossy.query_database()
         """
         if filters is None:
             filters = {}
@@ -107,9 +119,15 @@ class LossyClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.lossy import Lossy
-        >>> sample_id_to_retrieve = 'SAMPLE_Ice_LN2_11_20140221_000'
-        >>> values = Lossy.get_sample(sample_id=sample_id_to_retrieve)
+        .. dropdown:: Getting sample data for a given sample id
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+
+                from dace_query.lossy import Lossy
+                sample_id_to_retrieve = 'SAMPLE_Ice_LN2_11_20140221_000'
+                values = Lossy.get_sample(sample_id=sample_id_to_retrieve)
         """
 
         return self.dace.transform_to_format(
@@ -120,4 +138,13 @@ class LossyClass:
 
 
 Lossy: LossyClass = LossyClass()
-"""Lossy instance"""
+"""
+
+This is a singleton instance of the :class:`LossyClass` class.
+
+To use it, simply import it :
+
+.. code-block:: python
+
+    from dace_query.lossy import Lossy
+"""

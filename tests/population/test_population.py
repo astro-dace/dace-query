@@ -182,7 +182,7 @@ def test_population_get_columns(instance, population_id, request):
 
 
 @pytest.mark.parametrize(
-    "instance, population_id, age, columns",
+    "instance, population_id, age, columns, expected_keys",
     [
         pytest.param(
             "admin_dace_instance",
@@ -197,16 +197,31 @@ def test_population_get_columns(instance, population_id, request):
                 "planet_id",
                 "status",
             ],
+            [
+                'semi_major_axis',
+                'total_mass',
+                'total_radius',
+                'valid',
+                'system_id',
+                'planet_id',
+            ]
         ),
         pytest.param(
             "admin_dace_instance",
             "ng76",
             400000,
             None,
+            [
+                'system_id',
+                'planet_id',
+                'total_mass',
+                'semi_major_axis',
+                'valid'
+            ]
         ),
     ],
 )
-def test_population_get_snapshots(instance, population_id, age, columns, request):
+def test_population_get_snapshots(instance, population_id, age, columns, expected_keys, request):
     dace_instance: DaceClass = request.getfixturevalue(instance)
     instance = PopulationClass(dace_instance=dace_instance)
 
@@ -215,7 +230,8 @@ def test_population_get_snapshots(instance, population_id, age, columns, request
     )
     # Result is not empty
     assert results
-    assert all((key in results.keys()) for key in instance.SNAPSHOTS_DEFAULT_COLUMN)
+    
+    assert all((key in results.keys()) for key in expected_keys)
 
 
 @pytest.mark.parametrize(
@@ -229,6 +245,11 @@ def test_population_get_track(instance, population_id, system_id, planet_id, req
     dace_instance: DaceClass = request.getfixturevalue(instance)
     instance = PopulationClass(dace_instance=dace_instance)
 
+    expected_keys = [
+        "total_mass",
+        "semi_major_axis"
+    ]
+
     results = instance.get_track(
         population_id=population_id,
         system_id=system_id,
@@ -237,7 +258,7 @@ def test_population_get_track(instance, population_id, system_id, planet_id, req
     )
     # Result is not empty
     assert results
-    assert all((key in results.keys()) for key in instance.SIMULATIONS_DEFAULT_COLUMN)
+    assert all((key in results.keys()) for key in expected_keys)
 
 
 @pytest.mark.parametrize("instance", [pytest.param("anon_dace_instance")])

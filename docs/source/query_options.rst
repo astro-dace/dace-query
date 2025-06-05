@@ -186,8 +186,8 @@ This filter can be applied to *boolean* type parameters.
     values = Spectroscopy.query_database(filters=filters, limit=10)
 
 
-Advanced usage example
-======================
+Advanced usage example for filters
+===================================
 
 The parameters to be filtered and the filters themselves can be combined.
 
@@ -247,8 +247,8 @@ It consists of a dictionary type object (*key-value*), where the *key* is the pa
     sort: dict = {'obj_orb_period_day': 'asc'}
     values = Exoplanet.query_database(sort=sort, limit=10)
 
-Advanced usage example
-======================
+Advanced usage example for sort
+==================================
 
 The sort filter can be applied on multiple parameters at the same time.
 

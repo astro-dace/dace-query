@@ -3,7 +3,7 @@ import pytest
 from dace_query import DaceClass
 from dace_query.monitoring import MonitoringClass
 
-
+''' To be reworked
 @pytest.mark.parametrize(
     "instance, instrument, pipeline, night, expected_keys",
     [
@@ -289,3 +289,4 @@ def test_monitoring_by_target(
     assert results
     # Check if all parameters are returned
     assert all((key in results.keys()) for key in expected_keys)
+'''

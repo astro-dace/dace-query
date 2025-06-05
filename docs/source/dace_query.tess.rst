@@ -1,21 +1,9 @@
-dace\_query.tess package
+:html_theme.sidebar_secondary.remove:
+
+TESS
 ========================
 
-Submodules
-----------
-
-dace\_query.tess.tess module
-----------------------------
-
 .. automodule:: dace_query.tess.tess
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: dace_query.tess
    :members:
    :undoc-members:
    :show-inheritance:

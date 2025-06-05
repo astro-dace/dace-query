@@ -18,9 +18,13 @@ class AtomClass:
     The atom class
     Use to retrieve atom data from the opacity module.
 
-    **An atom instance is already provided, to use it:**
+    .. tip::
+    
+        An atom instance is already provided, to use it:
 
-    >>> from dace_query.opacity import Atom
+        .. code-block:: python
+
+            from dace_query.opacity import Atom
 
     """
 
@@ -31,8 +35,10 @@ class AtomClass:
         :param dace_instance: A dace object
         :type dace_instance: Optional[DaceClass]
 
-        >>> from dace_query.opacity import AtomClass
-        >>> atom_instance = AtomClass()
+        .. code-block:: python
+
+            from dace_query.opacity import AtomClass
+            atom_instance = AtomClass()
 
         """
         self.__OPACITY_API = 'opa-webapp'
@@ -77,8 +83,14 @@ class AtomClass:
         :return: The desired data in the chosen output format
         :rtype:  dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.opacity import Atom
-        >>> values = Atom.query_database()
+        .. dropdown:: Getting all atom data
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+        
+                from dace_query.opacity import Atom
+                values = Atom.query_database()
 
         """
         if filters is None:
@@ -125,8 +137,14 @@ class AtomClass:
         :type output_filename: Optional[str]
         :return: None
 
-        >>> from dace_query.opacity import Atom
-        >>> # Atom.download(atom='Lu', charge=0, line_list='Kurucz',version=1.0,temperature_boundaries=(2500, 2600),pressure_boundaries= (-8, -8),output_directory='/tmp',output_filename='test_atom.tar.gz')
+        .. dropdown:: Downloading data for a specific atom
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.opacity import Atom
+                Atom.download(atom='Lu', charge=0, line_list='Kurucz',version=1.0,temperature_boundaries=(2500, 2600),pressure_boundaries= (-8, -8),output_directory='/tmp',output_filename='test_atom.tar.gz')
 
         """
         self.dace.download_file(
@@ -168,8 +186,14 @@ class AtomClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.opacity import Atom
-        >>> values = Atom.get_data(atom='Lu', charge=0, line_list='Kurucz',version=1.0, temperature=2500, pressure_exponent=-8)
+        .. dropdown:: Getting data for a specific atom
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.opacity import Atom
+                values = Atom.get_data(atom='Lu', charge=0, line_list='Kurucz',version=1.0, temperature=2500, pressure_exponent=-8)
 
         """
         return self.dace.transform_to_format(
@@ -214,8 +238,14 @@ class AtomClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
-        >>> from dace_query.opacity import Atom
-        >>> values = Atom.get_high_resolution_data('Lu', 0, 'Kurucz', 1.0, 2500, -8, (1.01, 3.02))
+        .. dropdown:: Getting high resolution data for a specific atom
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.opacity import Atom
+                values = Atom.get_high_resolution_data('Lu', 0, 'Kurucz', 1.0, 2500, -8, (1.01, 3.02))
 
         """
         return self.dace.transform_to_format(
@@ -259,8 +289,14 @@ class AtomClass:
         :type output_filename: Optional[str]
         :return: None
 
-        >>> from dace_query.opacity import Atom
-        >>> # Atom.interpolate('Lu', 0, 'Kurucz', 1.0, [2510], output_directory='/tmp', output_filename='opacity_atom_interpolate.tar.gz')
+        .. dropdown:: Interpolating data for a specific atom
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.opacity import Atom
+                Atom.interpolate('Lu', 0, 'Kurucz', 1.0, [2510], output_directory='/tmp', output_filename='opacity_atom_interpolate.tar.gz')
 
         """
         download_response = self.dace.request_post(
@@ -287,4 +323,12 @@ class AtomClass:
 
 
 Atom: AtomClass = AtomClass()
-"""Atom instance"""
+"""
+This is a singleton instance of the :class:`AtomClass` class.
+
+To use it, simply import it :
+
+.. code-block:: python
+
+    from dace_query.opacity import Atom
+"""

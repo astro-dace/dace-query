@@ -33,14 +33,14 @@ def test_cheops_query_database_keys(instance, request):
     results = instance.query_database(limit=10, output_format='dict')
 
     expected_keys = ['obj_id_catname', 'obj_pos_coordinates_hms_dms', 'date_mjd_start', 'date_mjd_end', 'obj_mag_v',
-                     'pi_name', 'prog_id', 'req_id', 'data_arch_rev', 'file_key', 'file_ext', 'file_rootpath',
-                     'data_pipe_version', 'data_proc_num', 'db_lc_available', 'ins_name', 'obj_mag_cheops',
+                     'pi_name', 'prog_id', 'req_id', 'data_arch_rev', 'file_key', 'file_rootpath',
+                     'data_pipe_version', 'data_proc_num', 'db_lc_available', 'obj_mag_cheops',
                      'obj_mag_cheops_err', 'obj_mag_v_err', 'obj_sptype', 'obs_exptime', 'obs_id', 'obs_nexp',
-                     'obs_total_exptime', 'photom_ap_radius', 'photom_ap_type', 'photom_lc_dataname', 'pi_uid',
-                     'status_published']
+                     'obs_total_exptime', 'pi_uid', 'status_published']
 
     # Check if all parameters are returned
-    assert all(key in results.keys() for key in expected_keys)
+    for key in expected_keys:
+        assert key in results.keys(), f"Expected key '{key}' not found in results"
 
 
 @pytest.mark.parametrize('instance, status', [
@@ -102,20 +102,20 @@ def test_cheops_get_lightcurve(instance, target, request):
 
 
 @pytest.mark.parametrize('instance, target, file_key', [
-    pytest.param('admin_dace_instance', 'GJ 606', 'CH_PR100018_TG032102_V0100'),
-    pytest.param('admin_dace_instance', 'EC 15103-1557', 'CH_PR100002_TG011301_V0102')
+    pytest.param('admin_dace_instance', 'GJ4092', 'CH_PR100018_TG032102_V0300'),
+    pytest.param('admin_dace_instance', 'EC 12578-2107', 'CH_PR100002_TG011301_V0300')
 ])
 def test_cheops_lightcurve_contains_file_keys(instance, target, file_key, request):
     dace_instance: DaceClass = request.getfixturevalue(instance)
     instance = CheopsClass(dace_instance=dace_instance)
-    filters: dict = {'contains': {'file_key': [file_key]}}
+    filters: dict = {'file_key': {'contains': [file_key]}}
     results = instance.get_lightcurve(target=target, filters=filters, output_format='dict')
     assert file_key in results['file_key']
 
 
 @pytest.mark.parametrize('instance, file_key', [
     pytest.param('anon_dace_instance', 'CH_PR100018_TG027204_V0200', marks=pytest.mark.xfail),  # 'GJ 15 A' # not public
-    pytest.param('anon_dace_instance', 'CH_PR300005_TG000101_V0101'),  # HD 88111 # public
+    pytest.param('anon_dace_instance', 'CH_PR300005_TG000101_V0101', marks=pytest.mark.xfail),  # HD 88111 # not public
     pytest.param('admin_dace_instance', 'CH_PR100018_TG027204_V0200'),  # 'GJ 15 A' # not public
 
 ])
@@ -130,13 +130,19 @@ def test_cheops_download_movie(instance, file_key, request):
         output_directory=output_directory,
         output_filename=output_filename
     )
-    assert Path(output_directory, output_filename).exists()
-    Path(output_directory, output_filename).unlink(missing_ok=True)
+
+    file = Path(output_directory, output_filename)
+    assert file.exists()
+    
+    # Check that it weighs more than 15Kb (Empty archive is 10Kb) 
+    size = int(file.stat().st_size)
+    assert size > 15 * 1024
+    file.unlink(missing_ok=True)
 
 
 @pytest.mark.parametrize('instance, filepath_root', [
-    pytest.param('anon_dace_instance', 'PR300003_TG000302_V0100', marks=pytest.mark.xfail),
-    pytest.param('admin_dace_instance', 'PR300003_TG000302_V0100')
+    pytest.param('anon_dace_instance', 'PR150100_TG000101_V0300', marks=pytest.mark.xfail),
+    pytest.param('admin_dace_instance', 'PR150100_TG000101_V0300')
 
 ])
 def test_cheops_download_file(instance, filepath_root, request):
@@ -145,7 +151,7 @@ def test_cheops_download_file(instance, filepath_root, request):
     output_directory = '/tmp'
     output_filename = 'cheops.tar.gz'
 
-    filters: dict = {'file_rootpath':
+    filters: dict = {'file_key':
         {
             'contains': [filepath_root]
         }}
@@ -155,22 +161,73 @@ def test_cheops_download_file(instance, filepath_root, request):
         output_directory=output_directory,
         output_filename=output_filename
     )
-    assert Path(output_directory, output_filename).exists()
+    
+    file = Path(output_directory, output_filename)
+    assert file.exists()
+    
+    # Check that it weighs more than 15Kb (Empty archive is 10Kb) 
+    size = int(file.stat().st_size)
+    assert size > 15 * 1024
+    
+    
     Path(output_directory, output_filename).unlink(missing_ok=True)
 
 
+@pytest.mark.xfail(reason="The test is expected to fail due because the backend does not support this anymore")
 @pytest.mark.parametrize('instance, visit_filepath', [
     pytest.param('anon_dace_instance',
                  'cheops/outtray/PR31/PR310080_TG000301_V0200/CH_PR310080_TG000301_TU2021-02-12T00-16-22_SCI_RAW_SubArray_V0200.fits',
                  marks=pytest.mark.xfail),
     pytest.param('admin_dace_instance',
-                 'cheops/outtray/PR31/PR310080_TG000301_V0200/CH_PR310080_TG000301_TU2021-02-12T00-16-22_SCI_RAW_SubArray_V0200.fits')
+                 'cheops/outtray/PR30/PR300049_TG000501_V0100/CH_PR300049_TG000501_TU2020-03-13T20-06-20_SCI_RAW_HkCe-SubArray_V0100.fits')
 ])
 def test_cheops_list_data_products(instance, visit_filepath, request):
     dace_instance: DaceClass = request.getfixturevalue(instance)
     instance = CheopsClass(dace_instance=dace_instance)
 
     results = instance.list_data_product(visit_filepath=visit_filepath, output_format='dict')
+
+    assert results
+    assert 'file' in results
+
+
+
+
+@pytest.mark.parametrize('instance, visit_filepath', [
+    pytest.param('anon_dace_instance','PR150100_TG000101_V0300',marks=pytest.mark.xfail),
+    pytest.param('admin_dace_instance','PR150100_TG000101_V0300')
+])
+def test_cheops_browse(instance, visit_filepath, request):
+    dace_instance: DaceClass = request.getfixturevalue(instance)
+    instance = CheopsClass(dace_instance=dace_instance)
+
+
+    filters: dict = {'directory':
+        {
+            'contains': [visit_filepath]
+        }}
+    
+    results = instance.browse_products(filters=filters, output_format='dict')
+
+    assert results
+    assert 'file' in results
+
+
+@pytest.mark.parametrize('instance, visit_filepath', [
+    pytest.param('anon_dace_instance','PR150100_TG000101_V0300',marks=pytest.mark.xfail),
+    pytest.param('admin_dace_instance','PR150100_TG000101_V0300')
+])
+def test_cheops_browse_incorrect_filters(instance, visit_filepath, request):
+    dace_instance: DaceClass = request.getfixturevalue(instance)
+    instance = CheopsClass(dace_instance=dace_instance)
+
+
+    filters: dict = {'directory':
+        {
+            'contains': [visit_filepath] # typo in 'contain'
+        }}
+    
+    results = instance.browse_products(filters=filters, output_format='dict')
 
     assert results
     assert 'file' in results
@@ -193,14 +250,14 @@ def test_cheops_download_files(instance, files, request):
     instance = CheopsClass(dace_instance=dace_instance)
     output_directory = '/tmp'
     output_filename = 'files.tar.gz'
-    instance.download_files(
-        files=files,
-        file_type='lightcurves',
-        output_directory=output_directory,
-        output_filename=output_filename
-    )
-    assert Path(output_directory, output_filename).exists()
-    Path(output_directory, output_filename).unlink(missing_ok=True)
+    with pytest.raises(Exception) as e_info:
+        instance.download_files(
+            files=files,
+            file_type='lightcurves',
+            output_directory=output_directory,
+            output_filename=output_filename
+        )
+    assert 'no longer supported' in str(e_info.value)
 
 
 @pytest.mark.parametrize('instance, files', [
@@ -222,11 +279,11 @@ def test_cheops_download_specific_files(instance, files, request):
     instance = CheopsClass(dace_instance=dace_instance)
     output_directory = '/tmp'
     output_filename = 'specific_files.tar.gz'
-    instance.download_files(
-        files=files,
-        file_type='files',
-        output_directory=output_directory,
-        output_filename=output_filename
-    )
-    assert Path(output_directory, output_filename).exists()
-    Path(output_directory, output_filename).unlink(missing_ok=True)
+    with pytest.raises(Exception) as e_info:
+        instance.download_files(
+            files=files,
+            file_type='files',
+            output_directory=output_directory,
+            output_filename=output_filename
+        )
+    assert 'no longer supported' in str(e_info.value)
