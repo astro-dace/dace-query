@@ -44,7 +44,7 @@ class SpectroscopyClass:
             from dace_query.spectroscopy import SpectroscopyClass
             spectroscopy_instance = SpectroscopyClass()
         """
-        self.__OBS_API = 'obs-webapp'
+        self.__SPECTROSCOPY_API = 'spectroscopy-webapp'
 
         if dace_instance is None:
             self.dace = Dace
@@ -103,8 +103,8 @@ class SpectroscopyClass:
 
         return self.dace.transform_to_format(
             self.dace.request_get(
-                api_name=self.__OBS_API,
-                endpoint='observation/search/spectroscopy',
+                api_name=self.__SPECTROSCOPY_API,
+                endpoint='/search/',
                 params={
                     'limit': str(limit),
                     'filters': json.dumps(filters),
@@ -150,7 +150,7 @@ class SpectroscopyClass:
                 sky_coord, angle = SkyCoord("23h13m16s", "+57d10m06s", frame='icrs'), Angle('0.045d')
                 values = Spectroscopy.query_region(sky_coord=sky_coord, angle=angle)
         """
-        coordinate_filter_dict = self.dace.transform_coordinates_to_dict_old(sky_coord, angle)
+        coordinate_filter_dict = self.dace.transform_coordinates_to_dict(sky_coord, angle)
         filters_with_coordinates = {}
         if filters is not None:
             filters_with_coordinates.update(filters)
@@ -158,8 +158,9 @@ class SpectroscopyClass:
         return self.query_database(limit=limit, filters=filters_with_coordinates, output_format=output_format)
 
     def download(self,
-                 file_type: str,
+                 file_type: Optional[str] = None,
                  filters: Optional[dict] = None,
+                 compressed: Optional[bool] = False,
                  output_directory: Optional[str] = None,
                  output_filename: Optional[str] = None):
         """
@@ -198,29 +199,28 @@ class SpectroscopyClass:
                 filters_to_use = {'file_rootpath': {'contains':['HARPS.2010-04-04T03:38:51.386.fits']}}
                 Spectroscopy.download('s1d', filters=filters_to_use, output_filename='files.tar.gz')
         """
-        if file_type not in self.__ACCEPTED_FILE_TYPES:
-            raise ValueError('file_type must be one of these values : ' + ','.join(self.__ACCEPTED_FILE_TYPES))
         if filters is None:
             filters = {}
-
-        spectroscopy_data = self.query_database(filters=filters, output_format='dict')
-        files = spectroscopy_data.get('file_rootpath', [])
-        download_response = self.dace.request_post(
-            api_name=self.__OBS_API,
-            endpoint='download/prepare/spectroscopy',
+            
+        response = self.dace.request_post(
+            api_name=self.__SPECTROSCOPY_API,
+            endpoint='download',
             data=json.dumps({
                 'fileType': file_type,
-                'files': files
+                'filters': filters
             })
         )
-        if not download_response:
+        
+        download_id = response.get('key', None)
+        
+        if not download_id:
             return None
-        download_id = download_response['values'][0]
 
-        self.dace.persist_file_on_disk(
-            api_name=self.__OBS_API,
-            obs_type='spectroscopy',
-            download_id=download_id,
+
+        self.dace.download_file(
+            api_name=self.__SPECTROSCOPY_API,
+            endpoint=f'download/{download_id}',
+            params={'compressed': compressed},
             output_directory=output_directory,
             output_filename=output_filename
         )
@@ -231,8 +231,13 @@ class SpectroscopyClass:
                        output_directory: Optional[str] = None,
                        output_filename: Optional[str] = None):
         """
+        .. deprecated:: 2.0.0
+        
+            This method is no longer supported and will be removed in a future version.
+            Use :meth:`download` instead.
+        
         Download reduction products specified in argument for the list of raw files specified and save it locally.
-
+        
         .. dropdown:: Available file types
             :color: info
             :icon: list-unordered
@@ -265,6 +270,12 @@ class SpectroscopyClass:
                 files_to_download = ['harps/DRS-3.5/reduced/2019-07-05/HARPS.2019-07-06T04:00:00.323.fits']
                 Spectroscopy.download_files(files=files_to_download, file_type='all')
         """
+
+        raise NotImplementedError(
+            "Spectroscopy.download_files() is no longer supported as of version 2.1.0."
+            "Please use Spectroscopy.download() instead. "
+            "See documentation at https://dace-query.readthedocs.io/en/latest/dace_query.spectroscopy.html"
+        )
 
         if files is None:
             raise NoDataException
@@ -317,10 +328,16 @@ class SpectroscopyClass:
                 target_to_search = "C15-0734"
                 values = Spectroscopy.get_timeseries(target=target_to_search)
 
-        """
+        """        
         spectroscopy_data = self.dace.request_get(
-            api_name=self.__OBS_API,
-            endpoint=f'observation/radialVelocities/{target}'
+            api_name=self.__SPECTROSCOPY_API,
+            endpoint=f'target/{target}/timeseries/radial-velocities',
+            # Supported by backend but not used for now...
+            # params={
+            #     'limit': str(limit),
+            #     'filters': json.dumps(filters),
+            #     'sort': json.dumps(sort)
+            # }
         )
         if not sorted_by_instrument:
             return self.dace.transform_to_format(spectroscopy_data, output_format=output_format)
