@@ -82,6 +82,43 @@ These two filters can be applied to *string* type parameters.
     values = Exoplanet.query_database(filters=filters, limit=10)
 
 
+ilike - not ilike
+-----------------------
+
+This filter filters the chosen parameter if it matches or not the value sought, ignoring case sensitivity.
+
+These two filters can be applied to *string* type parameters.
+
+**Example :** *It returns planets that do not contain "hd" in their name, ignoring case sensitivity.*
+
+.. code-block:: python
+
+    from dace_query.exoplanet import Exoplanet
+
+    # not ilike
+    filters: dict = {
+        'obj_id_catname': {
+            'notilike': ['hd']
+        }
+    }
+    values = Exoplanet.query_database(filters=filters, limit=10)
+
+
+**Example :** *It returns planets that contain "hd" in their name, ignoring case sensitivity.*
+
+.. code-block:: python
+
+    from dace_query.exoplanet import Exoplanet
+
+    # ilike
+    filters: dict = {
+        'obj_id_catname': {
+            'ilike': ['hd']
+        }
+    }
+    values = Exoplanet.query_database(filters=filters, limit=10)
+
+
 equal - not equal
 -----------------
 
@@ -269,3 +306,44 @@ It returns planets:
     values = Exoplanet.query_database(sort=sort, limit=10)
 
 
+
+Alternative syntax for dictionaries
+============================================================
+
+Using literal syntax
+----------------------------------
+
+.. code-block:: python
+
+    filters = {
+        'obj_id_catname': {
+            'contains': ['HD']
+        },
+        'instrument_name': {
+            'ilike': ['HARPS']
+        }
+    }
+
+    sort = {
+        'rjd': 'asc',
+        'obj_id_catname': 'desc'
+    }
+
+Using dict() constructor
+----------------------------------
+
+.. code-block:: python
+
+    filters = dict(
+        obj_id_catname=dict(
+            contains=['HD']
+        ),
+        instrument_name=dict(
+            ilike=['HARPS']
+        )
+    )
+
+    sort = dict(
+        rjd='asc',
+        obj_id_catname='desc'
+    )

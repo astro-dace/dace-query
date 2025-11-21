@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum
 import json
 import logging
 from typing import Union, Optional
@@ -14,8 +15,52 @@ from dace_query.dace import NoDataException
 
 SPECTROSCOPY_DEFAULT_LIMIT = 10000
 
+class Source(Enum):
+    """
+    Enumeration of the different sources of radial velocity data.
+    Used to filter radial velocity time series data based on their source or method of rv extraction.
+    See :meth:`SpectroscopyClass.get_timeseries` for usage examples.
 
-class SpectroscopyClass:
+    +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
+    | Name                      | Value                     | Description                                                                                |
+    +===========================+===========================+============================================================================================+
+    | ``STANDARD_PROCESSING``   | ``POSTDRS_A``             | Standard DRS pipeline processing, RVs extracted from CCF.                                  |
+    +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
+    | ``TELLURIC_CORRECTION``   | ``POSTDRS_TELL_CORR_A``   | Standard DRS pipeline processing, RVs extracted from CCF with telluric correction applied. |
+    +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
+    | ``SKYSUB``                | ``POSTDRS_SKYSUB_A``      | Standard DRS pipeline processing, RVs extracted from CCF with sky subtraction applied.     |
+    +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
+    | ``SBART``                 | ``SBART``                 | RVs extracted using the SBART method.                                                      |
+    +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
+    | ``PUBLICATION``           | ``PUB``                   | RVs imported from publications.                                                            |
+    +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
+
+        
+    .. dropdown:: Filtering radial velocity time series data by source
+        :color: info
+        :icon: list-unordered
+    
+        **Getting only telluric corrected radial velocity data:**
+        
+        .. code-block:: python
+
+            from dace_query.spectroscopy import Spectroscopy
+                timeseries = Spectroscopy.get_timeseries('HR3259', rv_sources=[Spectroscopy.Source.TELLURIC_CORRECTION])
+                
+        **Getting standard and publication radial velocity data:**
+        
+        .. code-block:: python
+        
+            from dace_query.spectroscopy import Spectroscopy
+                timeseries = Spectroscopy.get_timeseries('HR3259', rv_sources=[Spectroscopy.Source.STANDARD_PROCESSING, Spectroscopy.Source.PUBLICATION])
+    """
+    STANDARD_PROCESSING = "POSTDRS_A"
+    TELLURIC_CORRECTION = "POSTDRS_TELL_CORR_A"
+    SKYSUB = "POSTDRS_SKYSUB_A"
+    SBART = "SBART"
+    PUBLICATION = "PUB"
+
+class SpectroscopyClass:    
     """
     The spectroscopy class.
     Use to retrieve data from the spectroscopy module.
@@ -231,7 +276,7 @@ class SpectroscopyClass:
                        output_directory: Optional[str] = None,
                        output_filename: Optional[str] = None):
         """
-        .. deprecated:: 2.0.0
+        .. deprecated:: 2.1.0
         
             This method is no longer supported and will be removed in a future version.
             Use :meth:`download` instead.
@@ -301,16 +346,87 @@ class SpectroscopyClass:
             output_filename=output_filename
         )
 
-    def get_timeseries(self, target: str,
+    def get_timeseries(self, 
+                       target: str,
+                       limit: Optional[int] = SPECTROSCOPY_DEFAULT_LIMIT,
+                       filters: Optional[dict] = None,
+                       sort: Optional[dict] = None,
                        sorted_by_instrument: Optional[bool] = True,
+                       rv_sources: Optional[list[Source]] = [Source.STANDARD_PROCESSING, Source.PUBLICATION],
                        output_format: Optional[str] = None) -> Union[dict[str, ndarray], DataFrame, Table, dict]:
         """
         Retrieve the spectroscopy time series data for a specified target in the chosen format.
 
+        Filters can be applied to the query via named arguments (see :doc:`query_options`).
+
         All available formats are defined in this section (see :doc:`output_format`).
+        
+        Using ``sorted_by_instrument=True`` will sort the results by ``instrument > drs > instrument_mode``
+        and return a nested dictionary structure as shown in the sample output below.
+        
+        **Note :** when using ``sorted_by_instrument=True``, the ``output_format`` argument is ignored.
+        
+        
+        .. dropdown:: Sample output with ``sorted_by_instrument=True``
+            :color: info
+            :icon: info
+            
+            .. code-block:: python
+            
+                    {
+                        'HARPS15': {
+                            'DRS-3.3.6': {
+                                'EGGS': {
+                                    'rjd': [...],
+                                    'rv': [...],,
+                                    ...
+                                },
+                                'HARPS': {
+                                    'rjd': [...],,
+                                    'rv': [...],,
+                                    ...
+                                }
+                            },
+                            'DRS-3.3.10': {
+                                ...
+                            }
+                        },
+                        'ESPRESSO19': {
+                            ...
+                        }
+                    }
+
+        The ``rv_sources`` argument allows to filter the radial velocity data based on their source or method of extraction.
+        See the :class:`Source` enum for available options and usage examples.
+        
+        .. dropdown:: Available radial velocity sources
+            :color: info
+            :icon: list-unordered
+
+            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
+            | Name                      | Value                     | Description                                                                                |
+            +===========================+===========================+============================================================================================+
+            | ``STANDARD_PROCESSING``   | ``POSTDRS_A``             | Standard DRS pipeline processing, RVs extracted from CCF.                                  |
+            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
+            | ``TELLURIC_CORRECTION``   | ``POSTDRS_TELL_CORR_A``   | Standard DRS pipeline processing, RVs extracted from CCF with telluric correction applied. |
+            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
+            | ``SKYSUB``                | ``POSTDRS_SKYSUB_A``      | Standard DRS pipeline processing, RVs extracted from CCF with sky subtraction applied.     |
+            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
+            | ``SBART``                 | ``SBART``                 | RVs extracted using the SBART method.                                                      |
+            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
+            | ``PUBLICATION``           | ``PUB``                   | RVs imported from publications.                                                            |
+            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
 
         :param target: The target to retrieve data from.
         :type target: str
+        :param limit: Maximum number of rows to return
+        :type limit: Optional[int]
+        :param filters: Filters to apply to the query
+        :type filters: Optional[dict]
+        :param sort: Sort order to apply to the query
+        :type sort: Optional[dict]
+        :param rv_sources: List of Source enum values to filter the radial velocity data by their source
+        :type rv_sources: Optional[list[Source]]
         :param sorted_by_instrument: Application of the instrument sorting
         :type sorted_by_instrument: Optional[bool]
         :param output_format: Type of data returns
@@ -326,25 +442,136 @@ class SpectroscopyClass:
 
                 from dace_query.spectroscopy import Spectroscopy
                 target_to_search = "C15-0734"
-                values = Spectroscopy.get_timeseries(target=target_to_search)
+                timeseries = Spectroscopy.get_timeseries(target=target_to_search)
+        
+        .. dropdown:: Getting spectroscopy timeseries for a target with filters applied
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+            
+                from dace_query.spectroscopy import Spectroscopy
+            
+                target_to_search = "HR3259"
+                filters_to_use = dict(
+                    instrument_name=dict(contains=['HARPS']),
+                    rjd=dict(min=58000, max=59000)
+                )
+                
+                timeseries = Spectroscopy.get_timeseries(target=target_to_search, filters=filters_to_use)
+        
+        .. dropdown:: Getting spectroscopy timeseries for a target with results sorted by <instrument>/<drs>/<instrument_mode>
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python 
+            
+                from dace_query.spectroscopy import Spectroscopy
+                    target_to_search = "C15-0734"
+                    timeseries = Spectroscopy.get_timeseries(target=target_to_search, sorted_by_instrument=True)
+        
+        .. dropdown:: Getting timeseries with from a specific radial velocity source (ex: only telluric corrected data)
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
 
-        """        
+                from dace_query.spectroscopy import Spectroscopy
+                    timeseries = Spectroscopy.get_timeseries('HR3259', rv_sources=[Spectroscopy.Source.TELLURIC_CORRECTION])
+                
+
+        .. dropdown:: Filtering spectroscopy timeseries by multiple radial velocity sources (ex: SKYSUB and TELLURIC_CORRECTION)
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+
+                from dace_query.spectroscopy import Spectroscopy
+                    timeseries = Spectroscopy.get_timeseries('HR3259', rv_sources=[Spectroscopy.Source.SKYSUB, Spectroscopy.Source.TELLURIC_CORRECTION])
+                
+
+        """
+        if filters is None:
+            filters = {}
+        if sort is None:
+            sort = {}
+        
+        # Allows to filter the source product file extensions based on the Source enum
+        if rv_sources:
+            rv_sources = rv_sources if isinstance(rv_sources, list) else [rv_sources]
+            
+            if not all(isinstance(pt, Source) for pt in rv_sources):
+                raise ValueError("rv_sources must be a list of Source enum values, ex: [Source.STANDARD_PROCESSING, Source.PUBLICATION]")
+                
+            filters["source_product_file_ext"] = {"equals": [pt.value for pt in rv_sources]}
+        
         spectroscopy_data = self.dace.request_get(
             api_name=self.__SPECTROSCOPY_API,
             endpoint=f'target/{target}/timeseries/radial-velocities',
-            # Supported by backend but not used for now...
-            # params={
-            #     'limit': str(limit),
-            #     'filters': json.dumps(filters),
-            #     'sort': json.dumps(sort)
-            # }
+            params={
+                'limit': str(limit),
+                'filters': json.dumps(filters),
+                'sort': json.dumps(sort)
+            }
         )
-        if not sorted_by_instrument:
-            return self.dace.transform_to_format(spectroscopy_data, output_format=output_format)
-        else:
+        
+        if sorted_by_instrument:
             transformed_data = self.dace.transform_to_format(spectroscopy_data, output_format='numpy')
             return self.dace.order_spectroscopy_data_by_instruments(transformed_data)
+        else:
+            return self.dace.transform_to_format(spectroscopy_data, output_format=output_format)
 
+
+
+    def browse_products(self,
+                filters: dict,
+                file_type: str = None,
+                aperture: Optional[str] = None,
+                output_format: Optional[str] = None) -> Union[dict[str, ndarray], DataFrame, Table, dict]:
+        """
+        List the filenames of all available data products for visits matching the specified filters.
+        
+        This method mirrors the signature of :meth:`download`, making it ideal for previewing available data products 
+        before performing any actual downloads. Use it to examine what files would be retrieved based on your 
+        filters, file_type, and aperture settings.
+        
+        You **must** specify filtering criteria (such as target name, file key, or other parameters) to limit the scope of the operation. 
+        This requirement helps avoid unintentionally requesting large amounts of data from the spectroscopy database.
+        **Filters** can be applied to the query via named arguments (see :doc:`query_options`).
+        
+        .. dropdown:: Setting filters
+            :color: primary
+            :icon: code-square
+        
+            .. code-block:: python
+            
+                # Filtering using target_name
+                target_name = 'TOI178'
+                filters: dict = {'target_name':{'equal': [target_name]}}
+
+        
+        :param filters: Filters to apply to the query
+        :type filters: dict
+        :param file_type: The type of files to download
+        :type file_type: str
+        :param output_format: Type of data returns
+        :type output_format: Optional[str]
+        :return: The desired data in the chosen output format
+        :rtype: dict[str, ndarray] or DataFrame or Table or dict
+
+        """
+        if filters is None:
+            filters = {}
+            
+        products = self.dace.request_post(
+            api_name=self.__SPECTROSCOPY_API,
+            endpoint='download/browse',
+            data=json.dumps({
+                'fileType': file_type,
+                'filters': filters
+                })
+        )
+        return self.dace.transform_to_format(products, output_format=output_format)
 
 Spectroscopy: SpectroscopyClass = SpectroscopyClass()
 """

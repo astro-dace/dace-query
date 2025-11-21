@@ -376,12 +376,12 @@ class DaceClass:
 
     @staticmethod
     def order_spectroscopy_data_by_instruments(data: dict[str, np.ndarray]) -> dict:
-        """Internal stuff"""
-        test = data
-        
+        if data is None or len(data) == 0:
+            return {}    
+    
         instruments_names = data.pop('instrument_name', None)
         instruments_modes = data.pop('ins_mode', None)
-
+        
         # There are three arrays with version_major, version_minor, version_patch and rv_extraction_method (DRS-{major}.{minor}.{patch}-{method})
         # Build DRS version strings from related arrays if they all exist.
         if all(k in data for k in ('version_major', 'version_minor', 'version_patch', 'rv_extraction_method')):
