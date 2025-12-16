@@ -3,8 +3,10 @@ from __future__ import annotations
 from enum import Enum
 import json
 import logging
-from typing import Union, Optional
+import re
+import warnings
 
+from typing import Union, Optional
 from astropy.coordinates import SkyCoord, Angle
 from astropy.table import Table
 from numpy import ndarray
@@ -21,19 +23,27 @@ class Source(Enum):
     Used to filter radial velocity time series data based on their source or method of rv extraction.
     See :meth:`SpectroscopyClass.get_timeseries` for usage examples.
 
-    +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
-    | Name                      | Value                     | Description                                                                                |
-    +===========================+===========================+============================================================================================+
-    | ``STANDARD_PROCESSING``   | ``POSTDRS_A``             | Standard DRS pipeline processing, RVs extracted from CCF.                                  |
-    +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
-    | ``TELLURIC_CORRECTION``   | ``POSTDRS_TELL_CORR_A``   | Standard DRS pipeline processing, RVs extracted from CCF with telluric correction applied. |
-    +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
-    | ``SKYSUB``                | ``POSTDRS_SKYSUB_A``      | Standard DRS pipeline processing, RVs extracted from CCF with sky subtraction applied.     |
-    +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
-    | ``SBART``                 | ``SBART``                 | RVs extracted using the SBART method.                                                      |
-    +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
-    | ``PUBLICATION``           | ``PUB``                   | RVs imported from publications.                                                            |
-    +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
+    .. dropdown:: Available radial velocity sources
+        :color: info
+        :icon: info
+        :open:
+    
+        Some DRS or postprocesses may be marked as ``Private`` if they are not publicly available.
+        To access private data, ensure you have the necessary permissions and `authentication <dace_introduction.html#authentication>`_.
+
+        +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
+        | Name                      | Value                     | Description                                                                                | Public/Private |
+        +===========================+===========================+============================================================================================+================+
+        | ``STANDARD_PROCESSING``   | ``"POSTDRS_A"``           | Standard DRS pipeline processing, RVs extracted from CCF.                                  | ``Public``     |
+        +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
+        | ``TELLURIC_CORRECTION``   | ``"POSTDRS_TELL_CORR_A"`` | Standard DRS pipeline processing, RVs extracted from CCF with telluric correction applied. | ``Public``     |
+        +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
+        | ``SKYSUB``                | ``"POSTDRS_SKYSUB_A"``    | Standard DRS pipeline processing, RVs extracted from CCF with sky subtraction applied.     | ``Public``     |
+        +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
+        | ``PUBLICATION``           | ``"PUB"``                 | RVs imported from publications.                                                            | ``Public``     |
+        +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
+        | ``SBART``                 | ``"SBART"``               | RVs extracted using the SBART method.                                                      | ``Private``    |
+        +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
 
         
     .. dropdown:: Filtering radial velocity time series data by source
@@ -75,7 +85,7 @@ class SpectroscopyClass:
             from dace_query.spectroscopy import Spectroscopy
 
     """
-    __ACCEPTED_FILE_TYPES = ['s1d', 's2d', 'ccf', 'bis', 'all']
+    __ACCEPTED_FILE_TYPES = ['s1d', 's2d', 'ccf', 'all']
 
     def __init__(self, dace_instance: Optional[DaceClass] = None):
         """
@@ -209,44 +219,107 @@ class SpectroscopyClass:
                  output_directory: Optional[str] = None,
                  output_filename: Optional[str] = None):
         """
-        Download Spectroscopy products (S1D, S2D, ...) and save it locally depending on the specified arguments.
+        Download spectroscopy reduction products (S1D, S2D, ...) and save them locally.
+
+        **Before downloading:** Use :meth:`browse_products` with identical parameters to preview 
+        what files would be downloaded. This is particularly useful for large data sets.
+
+        You **must** specify filtering criteria (such as target name, file key, or other parameters) to limit the scope of the operation. 
+        This requirement helps avoid unintentionally requesting large amounts of data from the spectroscopy database.
+        **Filters** can be applied to the query via named arguments (see :doc:`query_options`).
+            
+        .. dropdown:: Setting filters
+            :color: primary
+            :icon: code-square
         
+            .. code-block:: python
+            
+                # Filtering using target_name
+                target_name = 'TOI178'
+                filters: dict = {'target_name':{'equal': [target_name]}}
+
+
         .. dropdown:: Available file types
             :color: info
             :icon: list-unordered
-            :open:
-        
-            * ``'s1d'``
-            * ``'s2d'``
-            * ``'ccf'``
-            * ``'bis'``
-            * ``'guidance'``
-            * ``'all'``
 
-        Filters can be applied to the query via named arguments (see :doc:`query_options`).
+            To check for available file types, you can use the :meth:`browse_products` method.
 
-        :param file_type: The type of files to download
-        :type file_type: str
+        Files are sent in different formats based on the number of files to download:
+
+        - **Single file**: native format (e.g. ``.fits``)
+        - **Multiple files**: archive (``.tar`` or ``.tar.gz``)
+
+        .. dropdown:: Specifying compression behavior
+            :color: success
+            :icon: info
+
+            You can control the compression behavior of multi-file downloads using the ``compressed`` parameter.
+
+            - ``compressed=True`` produces a ``.tar.gz`` archive
+            - ``compressed=False`` produces a ``.tar`` archive
+
+            When downloading large datasets, disabling compression (``compressed=False``) may reduce CPU usage
+            and speed up the download at the cost of larger files.
+
+        :param file_type: The type of files to download (see "Available file types")
+        :type file_type: Optional[str]
         :param filters: Filters to apply to the query
         :type filters: Optional[dict]
-        :param output_directory: The directory where files will be saved
+        :param compressed: Whether to return a compressed archive when multiple files are downloaded
+        :type compressed: Optional[bool]
+        :param output_directory: The directory where files will be saved (defaults to the current working directory)
         :type output_directory: Optional[str]
-        :param output_filename: The filename for the download
+        :param output_filename: The filename for the download (defaults to the server-provided filename)
         :type output_filename: Optional[str]
+        :return: None
+        :rtype: None
 
-        .. dropdown:: Downloading spectroscopy products
+        .. dropdown:: Downloading all available products for a specific observation (raw frame)
             :color: success
             :icon: code-square
 
             .. code-block:: python
 
                 from dace_query.spectroscopy import Spectroscopy
-                filters_to_use = {'file_rootpath': {'contains':['HARPS.2010-04-04T03:38:51.386.fits']}}
-                Spectroscopy.download('s1d', filters=filters_to_use, output_filename='files.tar.gz')
+                filters_to_use = {'file_rootname': {'contains':['HARPS.2010-04-04T03:38:51.386']}}
+                Spectroscopy.download(filters=filters_to_use)
+
+        .. dropdown:: Downloading products using a list of raw frames
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.spectroscopy import Spectroscopy
+                
+                # Let's say we want to get a list of all observations (raw frames) for 'HR3259' on '2018-11-03'
+                raw_frame_filters = dict(target_name=dict(equal=['HR3259']), date_night=dict(equal=['2018-11-03']))
+                raw_frames = Spectroscopy.query_database(filters=raw_frame_filters, output_format='dict')
+
+                # Get the unique ids of those raw frames
+                spectrum_ids = raw_frames.get('spectrum_id')
+
+                # Pass the list of ids to download() to get all products for those spectra
+                if spectrum_ids:
+                    Spectroscopy.download(filters={'spectrum_id':{'equal':spectrum_ids}})
+
+
+        .. dropdown:: Downloading all ``CCF_A`` files for a given target name
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+            
+                from dace_query.spectroscopy import Spectroscopy
+                
+                target_name = 'TOI178'
+                filters = {'target_name':{'equal': [target_name]}}
+                Spectroscopy.download(file_type='CCF_A', filters=filters)
         """
         if filters is None:
             filters = {}
-            
+                        
         response = self.dace.request_post(
             api_name=self.__SPECTROSCOPY_API,
             endpoint='download',
@@ -291,8 +364,6 @@ class SpectroscopyClass:
             * ``'s1d'``
             * ``'s2d'``
             * ``'ccf'``
-            * ``'bis'``
-            * ``'guidance'``
             * ``'all'``
 
         :param files: The raw files
@@ -316,34 +387,72 @@ class SpectroscopyClass:
                 Spectroscopy.download_files(files=files_to_download, file_type='all')
         """
 
-        raise NotImplementedError(
-            "Spectroscopy.download_files() is no longer supported as of version 2.1.0."
-            "Please use Spectroscopy.download() instead. "
-            "See documentation at https://dace-query.readthedocs.io/en/latest/dace_query.spectroscopy.html"
-        )
-
         if files is None:
             raise NoDataException
 
-        files = list(map(lambda file: f'{file}.fits' if not file.endswith('.fits') else file, files))
-        # files = [file + '.fits' for file in files if '.fits' not in file]
-        download_response = self.dace.request_post(
-            api_name=self.__OBS_API,
-            endpoint='download/prepare/spectroscopy',
-            data=json.dumps(
-                {'fileType': file_type, 'files': files}
-            )
-        )
-        if not download_response:
-            return None
-        download_id = download_response['values'][0]
 
-        self.dace.persist_file_on_disk(
-            api_name=self.__OBS_API,
-            obs_type='spectroscopy',
-            download_id=download_id,
+        if file_type not in self.__ACCEPTED_FILE_TYPES:
+            raise ValueError(f"file_type must be one of {self.__ACCEPTED_FILE_TYPES}")
+
+        # Legacy support warnings, 'bis' and 'guidance' file types are no longer in the db
+        if file_type == 'guidance' : self.log.warning("The 'guidance' and 'bis' file types are no longer supported."); return
+        if file_type == 'bis' : self.log.warning("The 'bis' file type is no longer supported."); return
+
+        warnings.warn(
+            "The 'download_files' method is deprecated and will be removed in a future version. "
+            "Please use the 'download' method instead.",
+            DeprecationWarning, 
+            stacklevel=2
+        )
+
+        def adapt_legacy_file_type(file_type: str) -> Union[str, list[str], None]:
+            """
+            Convert legacy file type to new file type(s) used by the API.
+            """
+
+            # If file_type is a list, return it as is
+            if isinstance(file_type, list):
+                return file_type
+            
+            file_type_map = {
+                's1d': ['S1D_A', 'S1D_B'],
+                's2d': ['S2D_A', 'S2D_B'],
+                'ccf': ['CCF_A', 'CCF_B'],
+                'all': []
+            }
+            
+            return file_type_map.get(file_type, file_type) # Return the original file_type if not in the map
+
+        # Since the API expects raw file names, we need to extract them from the 'legacy' full paths.
+        # Regex to extract the raw file from a full path : harps/DRS-3.5/reduced/2019-07-05/HARPS.2019-07-06T04:00:00.323.fits -> HARPS.2019-07-06T04:00:00.323
+        raw_file_regex = re.compile(r'(?P<file_rootname>[A-Z]+\.\d{4}[:-]\d{2}[:-]\d{2}T\d{2}[:-]\d{2}[:-]\d{2}\.\d+)\.fits')
+        
+        # Apply the regex to all files in the list, extracting the raw file name
+        file_rootnames = [
+            match.group('file_rootname') 
+            for file in files 
+            if (match := raw_file_regex.search(file)) is not None
+        ]
+        
+        filters = {'file_rootname': {'contains': file_rootnames}}
+
+        # Fetch all matching raw frames
+        raw_frames = self.query_database(filters=filters, output_format='dict')
+        spectrum_ids = raw_frames.get('spectrum_id', [])
+        
+        if not spectrum_ids:
+            self.log.warning("No matching raw frames found for the provided files.")
+            return
+        
+        corrected_file_type = adapt_legacy_file_type(file_type)
+        
+        # Use the download method to get the desired products for the found raw frames
+        self.download(
+            file_type=corrected_file_type,
+            filters={'spectrum_id': {'equal': spectrum_ids}},
             output_directory=output_directory,
-            output_filename=output_filename
+            output_filename=output_filename,
+            compressed=True
         )
 
     def get_timeseries(self, 
@@ -401,21 +510,25 @@ class SpectroscopyClass:
         
         .. dropdown:: Available radial velocity sources
             :color: info
-            :icon: list-unordered
+            :icon: info
+            :open:
+        
+            Some DRS or postprocesses may be marked as ``Private`` if they are not publicly available.
+            To access private data, ensure you have the necessary permissions and `authentication <dace_introduction.html#authentication>`_.
 
-            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
-            | Name                      | Value                     | Description                                                                                |
-            +===========================+===========================+============================================================================================+
-            | ``STANDARD_PROCESSING``   | ``POSTDRS_A``             | Standard DRS pipeline processing, RVs extracted from CCF.                                  |
-            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
-            | ``TELLURIC_CORRECTION``   | ``POSTDRS_TELL_CORR_A``   | Standard DRS pipeline processing, RVs extracted from CCF with telluric correction applied. |
-            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
-            | ``SKYSUB``                | ``POSTDRS_SKYSUB_A``      | Standard DRS pipeline processing, RVs extracted from CCF with sky subtraction applied.     |
-            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
-            | ``SBART``                 | ``SBART``                 | RVs extracted using the SBART method.                                                      |
-            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
-            | ``PUBLICATION``           | ``PUB``                   | RVs imported from publications.                                                            |
-            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+
+            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
+            | Name                      | Value                     | Description                                                                                | Public/Private |
+            +===========================+===========================+============================================================================================+================+
+            | ``STANDARD_PROCESSING``   | ``"POSTDRS_A"``           | Standard DRS pipeline processing, RVs extracted from CCF.                                  | ``Public``     |
+            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
+            | ``TELLURIC_CORRECTION``   | ``"POSTDRS_TELL_CORR_A"`` | Standard DRS pipeline processing, RVs extracted from CCF with telluric correction applied. | ``Public``     |
+            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
+            | ``SKYSUB``                | ``"POSTDRS_SKYSUB_A"``    | Standard DRS pipeline processing, RVs extracted from CCF with sky subtraction applied.     | ``Public``     |
+            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
+            | ``PUBLICATION``           | ``"PUB"``                 | RVs imported from publications.                                                            | ``Public``     |
+            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
+            | ``SBART``                 | ``"SBART"``               | RVs extracted using the SBART method.                                                      | ``Private``    |
+            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
 
         :param target: The target to retrieve data from.
         :type target: str
@@ -529,7 +642,7 @@ class SpectroscopyClass:
                 aperture: Optional[str] = None,
                 output_format: Optional[str] = None) -> Union[dict[str, ndarray], DataFrame, Table, dict]:
         """
-        List the filenames of all available data products for visits matching the specified filters.
+        List the filenames of all available data products for observations (raw frames) matching the specified filters.
         
         This method mirrors the signature of :meth:`download`, making it ideal for previewing available data products 
         before performing any actual downloads. Use it to examine what files would be retrieved based on your 
@@ -559,6 +672,50 @@ class SpectroscopyClass:
         :return: The desired data in the chosen output format
         :rtype: dict[str, ndarray] or DataFrame or Table or dict
 
+
+        .. dropdown:: Listing all available products for a given target name
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+
+                from dace_query.spectroscopy import Spectroscopy
+                
+                target_name = 'TOI178'
+                values = Spectroscopy.browse_products(filters={'target_name':{'equal': [target_name]}})
+                
+
+        .. dropdown:: Listing all available products using a list of raw frames
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+            
+                from dace_query.spectroscopy import Spectroscopy
+
+                # Let's say we want to get a list of all observations (raw frames) for 'HR3259' on '2018-11-03'
+                raw_frame_filters = dict(target_name=dict(equal=['HR3259']), date_night=dict(equal=['2018-11-03']))
+                raw_frames = Spectroscopy.query_database(filters=raw_frame_filters, output_format='dict')
+
+                # Get the unique ids of those raw frames
+                spectrum_ids = raw_frames.get('spectrum_id')
+
+                # Pass the list of ids to browse_products to get the list of available products for those spectra
+                if spectrum_ids:
+                    products = Spectroscopy.browse_products(filters={'spectrum_id':{'equal':spectrum_ids}}, output_format='dict')
+        
+
+        .. dropdown:: Listing all available ``CCF_A`` for a given target name
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+
+                from dace_query.spectroscopy import Spectroscopy
+                
+                target_name = 'TOI178'
+                values = Spectroscopy.browse_products(filters={'target_name':{'equal': [target_name]}}, file_type='CCF_A')
+                
         """
         if filters is None:
             filters = {}
