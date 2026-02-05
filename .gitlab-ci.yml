@@ -1,6 +1,6 @@
 default:
   tags:
-    - dace-runner-dev
+    - deployment-runner-dev
 
 stages:
   - test
@@ -8,6 +8,8 @@ stages:
   - deploy
 
 Test:
+  tags:
+    - deployment-runner-dev
   stage: test
   image: python:3.9
   before_script:
@@ -24,6 +26,8 @@ Test:
   allow_failure: false
 
 Preview:    
+  tags:
+    - deployment-runner-dev
   stage: preview
   when: manual
   image: python:3.9
@@ -53,6 +57,8 @@ Preview:
     - python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/* -u __token__ -p ${TEST_PYPI_TOKEN} --verbose
 
 Deploy:
+  tags:
+    - deployment-runner-prod
   stage: deploy
   image: python:3.9
   needs: 
