@@ -283,10 +283,10 @@ class SpectroscopyClass:
             When downloading large datasets, disabling compression (``compressed=False``) may reduce CPU usage
             and speed up the download at the cost of larger files.
 
-        :param file_type: The type of files to download (see "Available file types")
-        :type file_type: Optional[str]
         :param filters: Filters to apply to the query
         :type filters: dict
+        :param file_type: The type of files to download (see "Available file types")
+        :type file_type: Optional[str]
         :param compressed: Whether to return a compressed archive when multiple files are downloaded
         :type compressed: Optional[bool]
         :param output_directory: The directory where files will be saved (defaults to the current working directory)
