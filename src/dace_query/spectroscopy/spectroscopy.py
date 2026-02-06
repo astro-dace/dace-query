@@ -106,7 +106,7 @@ class SpectroscopyClass:
             from dace_query.spectroscopy import Spectroscopy
 
     """
-    _VALID_FILE_TYPE_ABBREVIATIONS = ['s1d', 's2d', 'ccf', 'all']
+    __VALID_FILE_TYPE_ABBREVIATIONS = ['s1d', 's2d', 'ccf', 'all']
 
     def __init__(self, dace_instance: Optional[DaceClass] = None):
         """
@@ -234,8 +234,8 @@ class SpectroscopyClass:
         return self.query_database(limit=limit, filters=filters_with_coordinates, output_format=output_format)
 
     def download(self,
+                 filters: dict,
                  file_type: Optional[str] = None,
-                 filters: Optional[dict] = None,
                  compressed: Optional[bool] = False,
                  output_directory: Optional[str] = None,
                  output_filename: Optional[str] = None):
@@ -286,7 +286,7 @@ class SpectroscopyClass:
         :param file_type: The type of files to download (see "Available file types")
         :type file_type: Optional[str]
         :param filters: Filters to apply to the query
-        :type filters: Optional[dict]
+        :type filters: dict
         :param compressed: Whether to return a compressed archive when multiple files are downloaded
         :type compressed: Optional[bool]
         :param output_directory: The directory where files will be saved (defaults to the current working directory)
@@ -415,8 +415,8 @@ class SpectroscopyClass:
             raise NoDataException
 
 
-        if file_type not in self._VALID_FILE_TYPE_ABBREVIATIONS:
-            raise ValueError(f"file_type must be one of {self._VALID_FILE_TYPE_ABBREVIATIONS}")
+        if file_type not in self.__VALID_FILE_TYPE_ABBREVIATIONS:
+            raise ValueError(f"file_type must be one of {self.__VALID_FILE_TYPE_ABBREVIATIONS}")
 
         # Legacy support warnings, 'bis' and 'guidance' file types are no longer in the db
         if file_type == 'guidance' : self.log.warning("The 'guidance' and 'bis' file types are no longer supported."); return
@@ -648,7 +648,6 @@ class SpectroscopyClass:
     def browse_products(self,
                 filters: dict,
                 file_type: str = None,
-                aperture: Optional[str] = None,
                 output_format: Optional[str] = None) -> Union[dict[str, ndarray], DataFrame, Table, dict]:
         """
         List the filenames of all available data products for observations (raw frames) matching the specified filters.
@@ -729,11 +728,14 @@ class SpectroscopyClass:
         if filters is None:
             filters = {}
             
+        # Add support for legacy file type abbreviations (s1d, s2d, ccf, all)
+        corrected_file_type = _adapt_legacy_file_type(file_type)
+            
         products = self.dace.request_post(
             api_name=self.__SPECTROSCOPY_API,
             endpoint='download/browse',
             data=json.dumps({
-                'fileType': file_type,
+                'fileType': corrected_file_type,
                 'filters': filters
                 })
         )

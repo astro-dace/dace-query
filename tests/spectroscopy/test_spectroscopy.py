@@ -102,6 +102,67 @@ def test_spectroscopy_query_region(instance, sky_coord, expected_target: str, re
         ),
     ],
 )
+def test_spectroscopy_browse(instance, file, request):
+    dace_instance: DaceClass = request.getfixturevalue(instance)
+    instance : SpectroscopyClass = SpectroscopyClass(dace_instance=dace_instance)
+    filters = {"file_rootname": {"equal": [file]}}
+    
+    products = instance.browse_products(
+        filters=filters,
+        file_type="S1D_A"
+    )
+    
+    
+    assert products
+    
+    # Check that we've got a file extension in the results that matches the expected file type
+    assert all(product_file_ext == "S1D_A" for product_file_ext in products["file_ext"])
+
+@pytest.mark.parametrize(
+    "instance, file",
+    [
+        pytest.param(
+            "anon_dace_instance",
+            "HARPS.2016-03-09T02:55:16.776.fits",
+            marks=pytest.mark.xfail,
+        ),
+        pytest.param(
+            "admin_dace_instance",
+            "HARPS.2016-03-09T02:55:16.776.fits",
+        ),
+    ],
+)
+def test_spectroscopy_browse_shorthand(instance, file, request):
+    dace_instance: DaceClass = request.getfixturevalue(instance)
+    instance : SpectroscopyClass = SpectroscopyClass(dace_instance=dace_instance)
+    filters = {"file_rootname": {"equal": [file]}}
+    
+    products = instance.browse_products(
+        filters=filters,
+        file_type="s1d"
+    )
+    
+    
+    assert products
+    
+    # Check that we've got a file extension in the results that matches the expected file type
+    assert all((product_file_ext == "S1D_A" or product_file_ext == "S1D_B") for product_file_ext in products["file_ext"])
+
+
+@pytest.mark.parametrize(
+    "instance, file",
+    [
+        pytest.param(
+            "anon_dace_instance",
+            "HARPS.2016-03-09T02:55:16.776.fits",
+            marks=pytest.mark.xfail,
+        ),
+        pytest.param(
+            "admin_dace_instance",
+            "HARPS.2016-03-09T02:55:16.776.fits",
+        ),
+    ],
+)
 def test_spectroscopy_download(instance, file, request):
     dace_instance: DaceClass = request.getfixturevalue(instance)
     instance : SpectroscopyClass = SpectroscopyClass(dace_instance=dace_instance)
@@ -109,14 +170,43 @@ def test_spectroscopy_download(instance, file, request):
     output_directory = "/tmp"
     output_filename = "files.tar"
     instance.download(
-        "S1D_A",
         filters=filters,
+        file_type="S1D_A",
         output_directory=output_directory,
         output_filename=output_filename,
     )
     assert Path(output_directory, output_filename).exists()
     Path(output_directory, output_filename).unlink(missing_ok=True)
 
+
+@pytest.mark.parametrize(
+    "instance, file",
+    [
+        pytest.param(
+            "anon_dace_instance",
+            "HARPS.2016-03-09T02:55:16.776.fits",
+            marks=pytest.mark.xfail,
+        ),
+        pytest.param(
+            "admin_dace_instance",
+            "HARPS.2016-03-09T02:55:16.776.fits",
+        ),
+    ],
+)
+def test_spectroscopy_download_with_shorthand(instance, file, request):
+    dace_instance: DaceClass = request.getfixturevalue(instance)
+    instance : SpectroscopyClass = SpectroscopyClass(dace_instance=dace_instance)
+    filters = {"file_rootname": {"equal": [file]}}
+    output_directory = "/tmp"
+    output_filename = "files.tar"
+    instance.download(
+        filters=filters,
+        file_type="ccf",
+        output_directory=output_directory,
+        output_filename=output_filename,
+    )
+    assert Path(output_directory, output_filename).exists()
+    Path(output_directory, output_filename).unlink(missing_ok=True)
 
 @pytest.mark.parametrize(
     "instance, files",
