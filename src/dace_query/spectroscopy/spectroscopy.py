@@ -17,6 +17,25 @@ from dace_query.dace import NoDataException
 
 SPECTROSCOPY_DEFAULT_LIMIT = 10000
 
+
+def _adapt_legacy_file_type(file_type: Optional[Union[str, list[str]]]) -> Optional[Union[str, list[str]]]:
+    """Convert legacy file type to new file type(s) used by the API."""
+
+    if file_type is None:
+        return None
+
+    if isinstance(file_type, list):
+        return file_type
+
+    file_type_map: dict[str, list[str]] = {
+        's1d': ['S1D_A', 'S1D_B'],
+        's2d': ['S2D_A', 'S2D_B'],
+        'ccf': ['CCF_A', 'CCF_B'],
+        'all': [],
+    }
+
+    return file_type_map.get(file_type, file_type)
+
 class Source(Enum):
     """
     Enumeration of the different sources of radial velocity data.
@@ -87,7 +106,7 @@ class SpectroscopyClass:
             from dace_query.spectroscopy import Spectroscopy
 
     """
-    __ACCEPTED_FILE_TYPES = ['s1d', 's2d', 'ccf', 'all']
+    _VALID_FILE_TYPE_ABBREVIATIONS = ['s1d', 's2d', 'ccf', 'all']
 
     def __init__(self, dace_instance: Optional[DaceClass] = None):
         """
@@ -322,11 +341,14 @@ class SpectroscopyClass:
         if filters is None:
             filters = {}
                         
+        # Add support for legacy file type abbreviations (s1d, s2d, ccf, all)
+        corrected_file_type = _adapt_legacy_file_type(file_type)
+                        
         response = self.dace.request_post(
             api_name=self.__SPECTROSCOPY_API,
             endpoint='download',
             data=json.dumps({
-                'fileType': file_type,
+                'fileType': corrected_file_type,
                 'filters': filters
             })
         )
@@ -393,8 +415,8 @@ class SpectroscopyClass:
             raise NoDataException
 
 
-        if file_type not in self.__ACCEPTED_FILE_TYPES:
-            raise ValueError(f"file_type must be one of {self.__ACCEPTED_FILE_TYPES}")
+        if file_type not in self._VALID_FILE_TYPE_ABBREVIATIONS:
+            raise ValueError(f"file_type must be one of {self._VALID_FILE_TYPE_ABBREVIATIONS}")
 
         # Legacy support warnings, 'bis' and 'guidance' file types are no longer in the db
         if file_type == 'guidance' : self.log.warning("The 'guidance' and 'bis' file types are no longer supported."); return
@@ -406,24 +428,6 @@ class SpectroscopyClass:
             DeprecationWarning, 
             stacklevel=2
         )
-
-        def adapt_legacy_file_type(file_type: str) -> Union[str, list[str], None]:
-            """
-            Convert legacy file type to new file type(s) used by the API.
-            """
-
-            # If file_type is a list, return it as is
-            if isinstance(file_type, list):
-                return file_type
-            
-            file_type_map = {
-                's1d': ['S1D_A', 'S1D_B'],
-                's2d': ['S2D_A', 'S2D_B'],
-                'ccf': ['CCF_A', 'CCF_B'],
-                'all': []
-            }
-            
-            return file_type_map.get(file_type, file_type) # Return the original file_type if not in the map
 
         # Since the API expects raw file names, we need to extract them from the 'legacy' full paths.
         # Regex to extract the raw file from a full path : harps/DRS-3.5/reduced/2019-07-05/HARPS.2019-07-06T04:00:00.323.fits -> HARPS.2019-07-06T04:00:00.323
@@ -446,7 +450,8 @@ class SpectroscopyClass:
             self.log.warning("No matching raw frames found for the provided files.")
             return
         
-        corrected_file_type = adapt_legacy_file_type(file_type)
+        # Add support for legacy file type abbreviations (s1d, s2d, ccf, all)
+        corrected_file_type = _adapt_legacy_file_type(file_type)
         
         # Use the download method to get the desired products for the found raw frames
         self.download(
