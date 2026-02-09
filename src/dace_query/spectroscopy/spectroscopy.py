@@ -373,7 +373,7 @@ class SpectroscopyClass:
                        output_directory: Optional[str] = None,
                        output_filename: Optional[str] = None):
         """
-        .. deprecated:: 2.1.0
+        .. deprecated:: 3.0.0
         
             This method is no longer supported and will be removed in a future version.
             Use :meth:`download` instead.

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dace-query"
-version = "2.1.0"
+version = "3.0.0"
 description = "dace-query allows for easy querying of DACE and provides access to both public and private data through a simple utility."
 authors = [{ name = "dace-team", email = "dace-support@unige.ch" }]
 maintainers = [{ name = "dace-team", email = "dace-support@unige.ch" }]
