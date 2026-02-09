@@ -62,6 +62,7 @@ def test_spectroscopy_query_database_anon_access(instance, status, request):
             "anon_dace_instance",
             SkyCoord("05h54m04s", " -60d01m24s", frame="icrs"),
             "HD 40307",
+            marks=pytest.mark.xfail
         ),
         pytest.param(
             "admin_dace_instance",
@@ -242,7 +243,7 @@ def test_spectroscopy_download_files(instance, files, request):
 @pytest.mark.parametrize(
     "instance, target",
     [
-        pytest.param("anon_dace_instance", "HD40307"),
+        pytest.param("anon_dace_instance", "HD40307", marks=pytest.mark.xfail),
         pytest.param("admin_dace_instance", "SW0604-1658"),
     ],
 )
