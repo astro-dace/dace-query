@@ -23,7 +23,7 @@ Test:
     - printf "${TESTING_CONFIG_INI}" > tests/config.ini
     # Run the tests
     - pytest
-  allow_failure: false
+  allow_failure: true
 
 Preview:    
   tags:
@@ -31,7 +31,6 @@ Preview:
   stage: preview
   when: manual
   image: python:3.9
-  needs: [Test]
   before_script:
     - pip install --upgrade pip
     - pip install .

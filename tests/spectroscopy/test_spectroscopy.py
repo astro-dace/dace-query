@@ -346,7 +346,7 @@ def test_spectroscopy_get_timeseries_keys(instance, target, request):
         'source_product_id',
         'source_product_file_ext',
         'source_product_file_rootname',
-        'is_latest_standard_drs',
+        'is_latest_drs',
     ]
     # Check if all parameters are returned
     assert all((key in results.keys()) for key in expected_keys)
