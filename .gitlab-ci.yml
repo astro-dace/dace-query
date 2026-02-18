@@ -1,6 +1,6 @@
 default:
   tags:
-    - deployment-runner-dev
+    - deployment-runner-prod
 
 stages:
   - test
@@ -9,7 +9,7 @@ stages:
 
 Test:
   tags:
-    - deployment-runner-dev
+    - deployment-runner-prod
   stage: test
   image: python:3.9
   before_script:
@@ -27,7 +27,7 @@ Test:
 
 Preview:    
   tags:
-    - deployment-runner-dev
+    - deployment-runner-prod
   stage: preview
   when: manual
   image: python:3.9
