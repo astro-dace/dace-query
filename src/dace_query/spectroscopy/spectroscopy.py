@@ -236,6 +236,7 @@ class SpectroscopyClass:
     def download(self,
                  filters: dict,
                  file_type: Optional[str] = None,
+                 drs_version: Optional[str] = None,
                  compressed: Optional[bool] = False,
                  output_directory: Optional[str] = None,
                  output_filename: Optional[str] = None):
@@ -287,6 +288,8 @@ class SpectroscopyClass:
         :type filters: dict
         :param file_type: The type of files to download (see "Available file types")
         :type file_type: Optional[str]
+        :param drs_version: The DRS version of the products to download (e.g. 'latest')
+        :type drs_version: Optional[str]
         :param compressed: Whether to return a compressed archive when multiple files are downloaded
         :type compressed: Optional[bool]
         :param output_directory: The directory where files will be saved (defaults to the current working directory)
@@ -344,9 +347,20 @@ class SpectroscopyClass:
         # Add support for legacy file type abbreviations (s1d, s2d, ccf, all)
         corrected_file_type = _adapt_legacy_file_type(file_type)
                         
+        if drs_version is not None:
+            if drs_version == 'latest':
+                endpoint = 'download/latest'
+            else:
+                # TODO: Implement a way to specify a particular DRS version in the download endpoint (once the API supports it)
+                # Note : We need to provide the API an actual DRS id as DRS versions can be shared across instruments 
+                # and may not be unique, so we cannot just pass the drs_version string as is.
+                endpoint = 'download'
+        else:
+            endpoint = 'download'
+                        
         response = self.dace.request_post(
             api_name=self.__SPECTROSCOPY_API,
-            endpoint='download',
+            endpoint=endpoint,
             data=json.dumps({
                 'fileType': corrected_file_type,
                 'filters': filters
@@ -648,6 +662,7 @@ class SpectroscopyClass:
     def browse_products(self,
                 filters: dict,
                 file_type: str = None,
+                drs_version: Optional[str] = None,
                 output_format: Optional[str] = None) -> Union[dict[str, ndarray], DataFrame, Table, dict]:
         """
         List the filenames of all available data products for observations (raw frames) matching the specified filters.
@@ -675,6 +690,8 @@ class SpectroscopyClass:
         :type filters: dict
         :param file_type: The type of files to download
         :type file_type: str
+        :param drs_version: The DRS version of the products to browse (e.g. 'latest')
+        :type drs_version: Optional[str]
         :param output_format: Type of data returns
         :type output_format: Optional[str]
         :return: The desired data in the chosen output format
@@ -731,9 +748,20 @@ class SpectroscopyClass:
         # Add support for legacy file type abbreviations (s1d, s2d, ccf, all)
         corrected_file_type = _adapt_legacy_file_type(file_type)
             
+        if drs_version is not None:
+            if drs_version == 'latest':
+                endpoint = 'download/browse/latest'
+            else:
+                # TODO: Implement a way to specify a particular DRS version in the download endpoint (once the API supports it)
+                # Note : We need to provide the API an actual DRS id as DRS versions can be shared across instruments 
+                # and may not be unique, so we cannot just pass the drs_version string as is.
+                endpoint = 'download/browse'
+        else:
+            endpoint = 'download/browse'
+            
         products = self.dace.request_post(
             api_name=self.__SPECTROSCOPY_API,
-            endpoint='download/browse',
+            endpoint=endpoint,
             data=json.dumps({
                 'fileType': corrected_file_type,
                 'filters': filters
