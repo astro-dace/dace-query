@@ -9,6 +9,6 @@ Spectroscopy
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: dace_query.spectroscopy.spectroscopy
-   :members: Source
-   :no-index:
+.. autoclass:: dace_query.spectroscopy.spectroscopy.Source
+   :members:
+   :show-inheritance:

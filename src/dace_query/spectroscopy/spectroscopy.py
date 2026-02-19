@@ -39,8 +39,20 @@ def _adapt_legacy_file_type(file_type: Optional[Union[str, list[str]]]) -> Optio
 
 class Source(Enum):
     """
-    Enumeration of the different sources of radial velocity data.
-    Used to filter radial velocity time series data based on their source or method of rv extraction.
+    Enumeration of the different sources of radial velocity (RV) data.
+    Used to filter RV time series data based on their provenance and/or extraction pipeline.
+
+    A *source* is a label describing how an RV time series was produced (or ingested).
+
+    For RVs produced by a cross-correlation function (CCF) based DRS pipeline, multiple RV series may exist for the same observations depending on
+    the processing variant (for example ``standard``, ``telluric-corrected``, or ``sky-subtracted`` CCF products).
+
+    Other sources may correspond to alternative RV extraction pipelines, RVs resulting from a specific post-processing (i.e. SBART), 
+    or to RVs imported from an alternative source such as a publication.
+
+    By default, :meth:`SpectroscopyClass.get_timeseries` returns RVs from the ``STANDARD_PROCESSING`` and ``PUBLICATION`` sources, but you can specify
+    which sources to include or exclude using the ``rv_sources`` argument.
+
     See :meth:`SpectroscopyClass.get_timeseries` for usage examples.
 
     .. dropdown:: Available radial velocity sources
@@ -54,13 +66,13 @@ class Source(Enum):
         +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
         | Name                      | Value                     | Description                                                                                | Public/Private |
         +===========================+===========================+============================================================================================+================+
-        | ``STANDARD_PROCESSING``   | ``"POSTDRS_A"``           | Standard DRS pipeline processing, RVs extracted from CCF.                                  | ``Public``     |
+        | ``STANDARD_PROCESSING``   | ``"POSTDRS_A"``           | Standard DRS pipeline processing, RVs extracted from CCF. **(default)**                    | ``Public``     |
         +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
         | ``TELLURIC_CORRECTION``   | ``"POSTDRS_TELL_CORR_A"`` | Standard DRS pipeline processing, RVs extracted from CCF with telluric correction applied. | ``Public``     |
         +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
         | ``SKYSUB``                | ``"POSTDRS_SKYSUB_A"``    | Standard DRS pipeline processing, RVs extracted from CCF with sky subtraction applied.     | ``Public``     |
         +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
-        | ``PUBLICATION``           | ``"PUB"``                 | RVs imported from publications.                                                            | ``Public``     |
+        | ``PUBLICATION``           | ``"PUB"``                 | RVs imported from publications. **(default)**                                              | ``Public``     |
         +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
         | ``SBART``                 | ``"SBART"``               | RVs extracted using the SBART method.                                                      | ``Private``    |
         +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
@@ -75,15 +87,15 @@ class Source(Enum):
         
         .. code-block:: python
 
-            from dace_query.spectroscopy import Spectroscopy
-                timeseries = Spectroscopy.get_timeseries('HR3259', rv_sources=[Spectroscopy.Source.TELLURIC_CORRECTION])
+            from dace_query.spectroscopy import Spectroscopy, Source
+            timeseries = Spectroscopy.get_timeseries('HR3259', rv_sources=[Source.TELLURIC_CORRECTION])
                 
         **Getting standard and publication radial velocity data:**
         
         .. code-block:: python
         
-            from dace_query.spectroscopy import Spectroscopy
-                timeseries = Spectroscopy.get_timeseries('HR3259', rv_sources=[Spectroscopy.Source.STANDARD_PROCESSING, Spectroscopy.Source.PUBLICATION])
+            from dace_query.spectroscopy import Spectroscopy, Source
+            timeseries = Spectroscopy.get_timeseries('HR3259', rv_sources=[Source.STANDARD_PROCESSING, Source.PUBLICATION])
     """
     STANDARD_PROCESSING = "POSTDRS_A"
     TELLURIC_CORRECTION = "POSTDRS_TELL_CORR_A"
@@ -143,7 +155,7 @@ class SpectroscopyClass:
         self.log = logger
 
 
-    def _fetch_drs_ids(self, drs_version: str) -> list[str]:
+    def _fetch_drs_ids(self, drs_version: Union[str, list[str]]) -> list[str]:
         """
         Return the DRS IDs that match a DRS version string.
 
@@ -154,7 +166,14 @@ class SpectroscopyClass:
         - ``DRS-X.Y.Z-EXTRACTION_METHOD`` (e.g. ``DRS-3.3.10-SBART`` or ``DRS-3.3.10-CCF``)
         - Any other variant that still includes the major, minor, and patch numbers (e.g. ``drs.3.3.10`` or ``drs-3-3-10``)
         """
-        filters_for_drs = {'drs_version': {'equal': [drs_version]}}
+        if isinstance(drs_version, str):
+            drs_version = [drs_version]
+        elif isinstance(drs_version, list):
+            drs_version = drs_version
+        else:
+            raise ValueError("drs_version must be a string or a list of strings")
+                
+        filters_for_drs = {'drs_version': {'equal': drs_version}}
                         
         drs = self.dace.request_get(
             api_name=self.__SPECTROSCOPY_API,
@@ -265,20 +284,22 @@ class SpectroscopyClass:
     def download(self,
                  filters: dict,
                  file_type: Optional[str] = None,
-                 drs_version: Optional[str] = None,
+                 drs_version: Optional[Union[str, list[str]]] = None,
                  compressed: Optional[bool] = False,
                  output_directory: Optional[str] = None,
                  output_filename: Optional[str] = None):
         """
-        Download spectroscopy reduction products (S1D, S2D, ...) and save them locally.
+        Download reduced products (``CCF``, ``S1D``, ``S2D``, etc.) for observations (raw frames) matching the specified filters.
 
-        **Before downloading:** Use :meth:`browse_products` with identical parameters to preview 
+        **Before downloading:** you can use :meth:`browse_products` with identical parameters to preview 
         what files would be downloaded. This is particularly useful for large data sets.
 
         You **must** specify filtering criteria (such as target name, file key, or other parameters) to limit the scope of the operation. 
         This requirement helps avoid unintentionally requesting large amounts of data from the spectroscopy database.
-        **Filters** can be applied to the query via named arguments (see :doc:`query_options`).
-            
+        
+        **Filters** can be applied to the query via the ``filters`` argument (see :doc:`query_options`).
+        You can filter on any field available for a raw frame in :meth:`query_database` (e.g. ``target_name``, ``spectrum_id``, ``date_night``, ``file_rootname``, ...).
+        
         .. dropdown:: Setting filters
             :color: primary
             :icon: filter
@@ -324,7 +345,7 @@ class SpectroscopyClass:
                         # Download S2D products for a specific DRS version with a specifiic extraction method (e.g. DRS-3.3.10-CCF or DRS-3.3.10-SBART)
                         Spectroscopy.download(filters=filters, file_type='s2d', drs_version='DRS-3.3.10-CCF')
 
-        .. dropdown:: Available file types
+        .. dropdown:: Filtering file types
             :color: info
             :icon: list-unordered
 
@@ -369,10 +390,10 @@ class SpectroscopyClass:
 
         :param filters: Filters to apply to the query
         :type filters: dict
-        :param file_type: The type of files to download (see "Available file types")
+        :param file_type: The type of files to download (see "Filtering file types")
         :type file_type: Optional[str]
         :param drs_version: The DRS version of the products to browse (e.g. ``'latest'`` or specific version in the format ``'DRS-<major>.<minor>.<patch>-<rv_extraction_method>'``)
-        :type drs_version: Optional[str]
+        :type drs_version: Optional[Union[str, list[str]]]
         :param compressed: Whether to return a compressed archive when multiple files are downloaded
         :type compressed: Optional[bool]
         :param output_directory: The directory where files will be saved (defaults to the current working directory)
@@ -591,8 +612,9 @@ class SpectroscopyClass:
                        limit: Optional[int] = SPECTROSCOPY_DEFAULT_LIMIT,
                        filters: Optional[dict] = None,
                        sort: Optional[dict] = None,
-                       sorted_by_instrument: Optional[bool] = True,
                        rv_sources: Optional[list[Source]] = [Source.STANDARD_PROCESSING, Source.PUBLICATION],
+                       drs_version: Optional[Union[str, list[str]]] = None,
+                       sorted_by_instrument: Optional[bool] = True,
                        output_format: Optional[str] = None) -> Union[dict[str, ndarray], DataFrame, Table, dict]:
         """
         Retrieve the spectroscopy time series data for a specified target in the chosen format.
@@ -601,7 +623,7 @@ class SpectroscopyClass:
 
         All available formats are defined in this section (see :doc:`output_format`).
         
-        Using ``sorted_by_instrument=True`` will sort the results by ``instrument > drs > instrument_mode``
+        Using ``sorted_by_instrument=True`` will sort the results by ``instrument → DRS version → instrument mode``
         and return a nested dictionary structure as shown in the sample output below.
         
         **Note :** when using ``sorted_by_instrument=True``, the ``output_format`` argument is ignored.
@@ -615,7 +637,7 @@ class SpectroscopyClass:
             
                     {
                         'HARPS15': {
-                            'DRS-3.3.6': {
+                            'DRS-3.3.6-CCF': {
                                 'EGGS': {
                                     'rjd': [...],
                                     'rv': [...],,
@@ -627,7 +649,10 @@ class SpectroscopyClass:
                                     ...
                                 }
                             },
-                            'DRS-3.3.10': {
+                            'DRS-3.3.10-CCF': {
+                                ...
+                            }
+                            'DRS-3.3.10-SBART': {
                                 ...
                             }
                         },
@@ -636,33 +661,105 @@ class SpectroscopyClass:
                         }
                     }
 
-        The ``rv_sources`` argument allows to filter the radial velocity data based on their source or method of extraction.
-        See the :class:`Source` enum for available options and usage examples.
-        
-        .. dropdown:: Available radial velocity sources
+
+        .. dropdown:: Selecting radial velocity sources
             :color: info
             :icon: info
-            :open:
-        
+
+            The ``rv_sources`` argument allows to filter the radial velocity data based on their provenance (e.g. standard DRS processing, specific post-processing, or publications).
+            See the :class:`Source` enum for available options and usage examples.
+            
+            By default, this method returns RVs from ``Source.STANDARD_PROCESSING`` (standard DRS / CCF)
+            and ``Source.PUBLICATION``.
+            
             Some DRS or postprocesses may be marked as ``Private`` if they are not publicly available.
             To access private data, ensure you have the necessary permissions and `authentication <dace_introduction.html#authentication>`_.
+            
+            .. dropdown:: Tips for working with the output when ``sorted_by_instrument=True``
+                :color: success
+                :icon: info
 
-            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
-            | Name                      | Value                     | Description                                                                                | Public/Private |
-            +===========================+===========================+============================================================================================+================+
-            | ``STANDARD_PROCESSING``   | ``"POSTDRS_A"``           | Standard DRS pipeline processing, RVs extracted from CCF.                                  | ``Public``     |
-            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
-            | ``TELLURIC_CORRECTION``   | ``"POSTDRS_TELL_CORR_A"`` | Standard DRS pipeline processing, RVs extracted from CCF with telluric correction applied. | ``Public``     |
-            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
-            | ``SKYSUB``                | ``"POSTDRS_SKYSUB_A"``    | Standard DRS pipeline processing, RVs extracted from CCF with sky subtraction applied.     | ``Public``     |
-            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
-            | ``PUBLICATION``           | ``"PUB"``                 | RVs imported from publications.                                                            | ``Public``     |
-            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
-            | ``SBART``                 | ``"SBART"``               | RVs extracted using the SBART method.                                                      | ``Private``    |
-            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
-            | ``LBL``                   | ``"LBL"``                 | RVs extracted using the LBL method.                                                        | ``Private``    |
-            +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
+                When ``sorted_by_instrument=True``, the output is a nested dictionary grouped by:
+                
+                    ``instrument → DRS version → instrument mode``.
 
+                If you request multiple RV sources that come from the **same DRS** (same instrument/DRS/mode), they are returned
+                together in the **same series**.
+
+                For example, if you include both ``Source.STANDARD_PROCESSING`` and ``Source.TELLURIC_CORRECTION``, you will get
+                two RV points per observation in the same series (one telluric-corrected and one not), under the same instrument/DRS/mode key.
+                
+                This might not be desirable if you want to keep telluric-corrected and non-telluric-corrected RVs separate, in which case you can either:
+                
+                - Make two separate calls to :meth:`get_timeseries`, one for each source, to get separate series for each source while keeping the grouping by instrument/DRS/mode.
+                - Set ``sorted_by_instrument=False`` to get a flat structure where each row corresponds to a single point (which can be further filtered using pandas)
+                
+
+        .. dropdown:: Filtering by DRS version
+            :color: info
+            :icon: filter
+
+            You can further restrict which series are returned by specifying the ``drs_version`` argument.            
+
+            +------------------------------------+--------------------------------------------------------------------------+
+            | Value                              | Description                                                              |
+            +====================================+==========================================================================+
+            | ``None``                           | Do not filter by DRS version (default)                                   |
+            +------------------------------------+--------------------------------------------------------------------------+
+            | ``'latest'``                       | Select the latest available DRS version per instrument                   |
+            +------------------------------------+--------------------------------------------------------------------------+
+            | ``'DRS-<major>.<minor>.<patch>'``  | Select a specific DRS version                                            |
+            |                                    | (e.g. ``'DRS-3.3.10'`` or ``'3.3.10'`` or ``'DRS-3.3.10-CCF'``)          |
+            +------------------------------------+--------------------------------------------------------------------------+
+
+            Example:
+
+            .. code-block:: python
+
+                    from dace_query.spectroscopy import Spectroscopy
+                    
+                    # Get timeseries for the latest DRS version available per instrument
+                    timeseries = Spectroscopy.get_timeseries(target='HD69830', drs_version='latest')
+                    
+                    # Ge timeseries for a specific DRS version (e.g. DRS-3.3.10)
+                    timeseries = Spectroscopy.get_timeseries(target='HD69830', drs_version='DRS-3.3.10')
+                    
+                    # Get timeseries for a specific DRS version with a specifiic extraction method (e.g. DRS-3.3.10-CCF or DRS-3.3.10-SBART)
+                    # Make sure to specify the source (by default we only include standard processing and publications)
+                    timeseries = Spectroscopy.get_timeseries(target='HD69830', rv_sources=[Source.SBART], drs_version='DRS-3.3.10-SBART')
+
+
+            If you set both ``rv_sources`` and ``drs_version``, we apply **both** filters.
+            This means you only get radial-velocity time series that match the selected sources
+            **and** belong to the selected DRS version.
+
+            If that DRS version does not exist for the selected source(s) (for example because it corresponds
+            to a different extraction method / pipeline), then there is no overlap and you will get **no results**.
+            
+            Pick a DRS version that matches the RV sources you selected, for example:
+            
+            .. code-block:: python
+                
+                from dace_query.spectroscopy import Spectroscopy, Source
+                
+                # Yields no results as SBART is not selected in rv_sources by default
+                timeseries = Spectroscopy.get_timeseries(
+                    target='HR3259',
+                    drs_version='DRS-3.3.10-SBART' 
+                )
+                
+                timeseries = Spectroscopy.get_timeseries(
+                    target='HR3259',
+                    rv_sources=[Source.SBART, Source.STANDARD_PROCESSING], # Get both standard and SBART radial velocities
+                    drs_version='DRS-3.3.10-SBART'                         # Returns only SBART series from DRS-3.3.10
+                )
+                
+                timeseries = Spectroscopy.get_timeseries(
+                    target='HR3259',
+                    rv_sources=[Source.SBART, Source.STANDARD_PROCESSING], # Get both standard and SBART radial velocities
+                    drs_version='DRS-3.3.10'                               # Returns SBART + standard series from DRS-3.3.10 (if available)
+                )
+                
         :param target: The target to retrieve data from.
         :type target: str
         :param limit: Maximum number of rows to return
@@ -673,6 +770,8 @@ class SpectroscopyClass:
         :type sort: Optional[dict]
         :param rv_sources: List of Source enum values to filter the radial velocity data by their source
         :type rv_sources: Optional[list[Source]]
+        :param drs_version: The DRS version to filter the data (e.g. ``'latest'`` or specific version in the format ``'DRS-<major>.<minor>.<patch>-<rv_extraction_method>'``)
+        :type drs_version: Optional[Union[str, list[str]]]
         :param sorted_by_instrument: Application of the instrument sorting
         :type sorted_by_instrument: Optional[bool]
         :param output_format: Type of data returns
@@ -741,6 +840,18 @@ class SpectroscopyClass:
             filters = {}
         if sort is None:
             sort = {}
+            
+        # Allow to filter by DRS version if the user provided a drs_version argument
+        if drs_version is not None:
+            if drs_version == 'latest':
+                filters['is_latest_drs'] = {'is': True}
+            else:
+                drs_ids = self._fetch_drs_ids(drs_version)
+                if drs_ids:
+                    filters['drs_id'] = {'equal': drs_ids}
+                else:
+                    self.log.warning(f"No DRS found matching the provided drs_version '{drs_version}'.")
+                    return {}
         
         # Allows to filter the source product file extensions based on the Source enum
         if rv_sources:
@@ -772,18 +883,20 @@ class SpectroscopyClass:
     def browse_products(self,
                 filters: dict,
                 file_type: str = None,
-                drs_version: Optional[str] = None,
+                drs_version: Optional[Union[str, list[str]]] = None,
                 output_format: Optional[str] = None) -> Union[dict[str, ndarray], DataFrame, Table, dict]:
         """
         List the filenames of all available data products for observations (raw frames) matching the specified filters.
         
         This method mirrors the signature of :meth:`download`, making it ideal for previewing available data products 
         before performing any actual downloads. Use it to examine what files would be retrieved based on your 
-        filters, file_type, and aperture settings.
+        ``filters``, ``file_type``, and ``drs_version``
         
         You **must** specify filtering criteria (such as target name, file key, or other parameters) to limit the scope of the operation. 
         This requirement helps avoid unintentionally requesting large amounts of data from the spectroscopy database.
-        **Filters** can be applied to the query via named arguments (see :doc:`query_options`).
+        
+        **Filters** can be applied to the query via the ``filters`` argument (see :doc:`query_options`).
+        You can filter on any field available for a raw frame in :meth:`query_database` (e.g. ``target_name``, ``spectrum_id``, ``date_night``, ``file_rootname``, ...).
         
         .. dropdown:: Setting filters
             :color: primary
@@ -830,7 +943,7 @@ class SpectroscopyClass:
                         # Download S2D products for a specific DRS version with a specifiic extraction method (e.g. DRS-3.3.10-CCF or DRS-3.3.10-SBART)
                         Spectroscopy.download(filters=filters, file_type='s2d', drs_version='DRS-3.3.10-CCF')
 
-        .. dropdown:: Available file types
+        .. dropdown:: Filtering file types
             :color: info
             :icon: list-unordered
 
@@ -857,10 +970,10 @@ class SpectroscopyClass:
             
         :param filters: Filters to apply to the query
         :type filters: dict
-        :param file_type: The type of files to download
+        :param file_type: The type of files to download (see "Filtering file types")
         :type file_type: str
         :param drs_version: The DRS version of the products to browse (e.g. ``'latest'`` or specific version in the format ``'DRS-<major>.<minor>.<patch>-<rv_extraction_method>'``)
-        :type drs_version: Optional[str]
+        :type drs_version: Optional[Union[str, list[str]]]
         :param output_format: Type of data returns
         :type output_format: Optional[str]
         :return: The desired data in the chosen output format
