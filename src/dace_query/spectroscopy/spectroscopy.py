@@ -36,6 +36,7 @@ def _adapt_legacy_file_type(file_type: Optional[Union[str, list[str]]]) -> Optio
 
     return file_type_map.get(file_type, file_type)
 
+
 class Source(Enum):
     """
     Enumeration of the different sources of radial velocity data.
@@ -63,7 +64,7 @@ class Source(Enum):
         +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
         | ``SBART``                 | ``"SBART"``               | RVs extracted using the SBART method.                                                      | ``Private``    |
         +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
-        + ``LBL``                   | ``"LBL"``                 | RVs extracted using the LBL method.                                                        | ``Private``    |
+        | ``LBL``                   | ``"LBL"``                 | RVs extracted using the LBL method.                                                        | ``Private``    |
         +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
         
     .. dropdown:: Filtering radial velocity time series data by source
@@ -108,6 +109,8 @@ class SpectroscopyClass:
     """
     __VALID_FILE_TYPE_ABBREVIATIONS = ['s1d', 's2d', 'ccf', 'all']
 
+
+
     def __init__(self, dace_instance: Optional[DaceClass] = None):
         """
         Create a configurable spectroscopy object which uses a specified dace instance.
@@ -138,6 +141,32 @@ class SpectroscopyClass:
         ch.setFormatter(formatter)
         logger.addHandler(ch)
         self.log = logger
+
+
+    def _fetch_drs_ids(self, drs_version: str) -> list[str]:
+        """
+        Return the DRS IDs that match a DRS version string.
+
+        The input can be written in several common formats, for example:
+
+        - ``DRS-X.Y.Z`` (e.g. ``DRS-3.3.10``)
+        - ``X.Y.Z`` (e.g. ``3.3.10``)
+        - ``DRS-X.Y.Z-EXTRACTION_METHOD`` (e.g. ``DRS-3.3.10-SBART`` or ``DRS-3.3.10-CCF``)
+        - Any other variant that still includes the major, minor, and patch numbers (e.g. ``drs.3.3.10`` or ``drs-3-3-10``)
+        """
+        filters_for_drs = {'drs_version': {'equal': [drs_version]}}
+                        
+        drs = self.dace.request_get(
+            api_name=self.__SPECTROSCOPY_API,
+            endpoint='drs',
+            params={
+                'filters': json.dumps(filters_for_drs)
+            }
+        )
+        
+        drs = self.dace.transform_to_format(drs, output_format='dict')
+        
+        return drs.get('drs_id', [])
 
     def query_database(self,
                        limit: Optional[int] = SPECTROSCOPY_DEFAULT_LIMIT,
@@ -252,20 +281,74 @@ class SpectroscopyClass:
             
         .. dropdown:: Setting filters
             :color: primary
-            :icon: code-square
+            :icon: filter
         
             .. code-block:: python
             
                 # Filtering using target_name
                 target_name = 'TOI178'
                 filters: dict = {'target_name':{'equal': [target_name]}}
+                
+        .. dropdown:: Filtering by DRS version
+                :color: info
+                :icon: filter
 
+                You can restrict which products are returned by specifying the ``drs_version`` argument.
+                
+                +------------------------------------+--------------------------------------------------------------------------+
+                | Value                              | Description                                                              |
+                +====================================+==========================================================================+
+                | ``None``                           | Do not filter by DRS version (default)                                   |
+                +------------------------------------+--------------------------------------------------------------------------+
+                | ``'latest'``                       | Select the latest available DRS version                                  |
+                +------------------------------------+--------------------------------------------------------------------------+
+                | ``'DRS-<major>.<minor>.<patch>'``  | Select a specific DRS version                                            |
+                |                                    | (e.g. ``'DRS-3.3.10'`` or ``'3.3.10'`` or ``'DRS-3.3.10-CCF'``)          |
+                +------------------------------------+--------------------------------------------------------------------------+
+
+
+                Example:
+
+                .. code-block:: python
+
+                        from dace_query.spectroscopy import Spectroscopy
+
+                        filters = {'target_name': {'equal': ['TOI178']}}
+                        
+                        # Download CCFs for the latest DRS version available
+                        Spectroscopy.download(filters=filters, file_type='ccf', drs_version='latest')
+                        
+                        # Download S1D products for a specific DRS version (e.g. DRS-3.3.10)
+                        Spectroscopy.download(filters=filters, file_type='s1d', drs_version='DRS-3.3.10')
+                        
+                        # Download S2D products for a specific DRS version with a specifiic extraction method (e.g. DRS-3.3.10-CCF or DRS-3.3.10-SBART)
+                        Spectroscopy.download(filters=filters, file_type='s2d', drs_version='DRS-3.3.10-CCF')
 
         .. dropdown:: Available file types
             :color: info
             :icon: list-unordered
 
-            To check for available file types, you can use the :meth:`browse_products` method.
+            You can specify the type of files to download using the ``file_type`` argument.
+
+            Available values:
+
+            +----------------------+-----------------------------------+
+            | Value                | Corresponding file types          |
+            +======================+===================================+
+            | ``'s1d'``            | ``S1D_A``, ``S1D_B``              |
+            +----------------------+-----------------------------------+
+            | ``'s2d'``            | ``S2D_A``, ``S2D_B``              |
+            +----------------------+-----------------------------------+
+            | ``'ccf'``            | ``CCF_A``, ``CCF_B``              |
+            +----------------------+-----------------------------------+
+            | ``'all'`` or ``None``| All file types (default)          |
+            +----------------------+-----------------------------------+
+
+            You can also pass exact file types (e.g. ``'S1D_A'`` or ``'CCF_B'``)
+            
+            or a list of exact file types (e.g. ``['S1D_A', 'S1D_B', 'CCF_B']``) to download specific products.
+
+            To check which file types are available for your filters, you may use :meth:`browse_products`.
 
         Files are sent in different formats based on the number of files to download:
 
@@ -288,7 +371,7 @@ class SpectroscopyClass:
         :type filters: dict
         :param file_type: The type of files to download (see "Available file types")
         :type file_type: Optional[str]
-        :param drs_version: The DRS version of the products to download (e.g. 'latest')
+        :param drs_version: The DRS version of the products to browse (e.g. ``'latest'`` or specific version in the format ``'DRS-<major>.<minor>.<patch>-<rv_extraction_method>'``)
         :type drs_version: Optional[str]
         :param compressed: Whether to return a compressed archive when multiple files are downloaded
         :type compressed: Optional[bool]
@@ -340,6 +423,31 @@ class SpectroscopyClass:
                 target_name = 'TOI178'
                 filters = {'target_name':{'equal': [target_name]}}
                 Spectroscopy.download(file_type='CCF_A', filters=filters)
+
+        .. dropdown:: Downloading all ``ccf`` files for a given target name and the latest DRS version available
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+            
+                from dace_query.spectroscopy import Spectroscopy
+                
+                target_name = 'TOI178'
+                filters = {'target_name':{'equal': [target_name]}}
+                Spectroscopy.download(file_type='ccf', filters=filters, drs_version='latest')
+                
+                
+        .. dropdown:: Downloading all ``s1d`` files for a given target name and a specific DRS version (e.g. ``DRS-3.3.10``)
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+            
+                from dace_query.spectroscopy import Spectroscopy
+                
+                target_name = 'TOI178'
+                filters = {'target_name':{'equal': [target_name]}}
+                Spectroscopy.download(file_type='s1d', filters=filters, drs_version='DRS-3.3.10')
         """
         if filters is None:
             filters = {}
@@ -347,23 +455,25 @@ class SpectroscopyClass:
         # Add support for legacy file type abbreviations (s1d, s2d, ccf, all)
         corrected_file_type = _adapt_legacy_file_type(file_type)
                         
+        drs_ids = []
+        endpoint = 'download'
+        
+        # If the user provided a specific DRS version...
         if drs_version is not None:
+            # Requested the latest DRS version available
             if drs_version == 'latest':
                 endpoint = 'download/latest'
+            # Requested a specific DRS version
             else:
-                # TODO: Implement a way to specify a particular DRS version in the download endpoint (once the API supports it)
-                # Note : We need to provide the API an actual DRS id as DRS versions can be shared across instruments 
-                # and may not be unique, so we cannot just pass the drs_version string as is.
-                endpoint = 'download'
-        else:
-            endpoint = 'download'
+                drs_ids = self._fetch_drs_ids(drs_version)
                         
         response = self.dace.request_post(
             api_name=self.__SPECTROSCOPY_API,
             endpoint=endpoint,
             data=json.dumps({
                 'fileType': corrected_file_type,
-                'filters': filters
+                'filters': filters,
+                'drsIds': drs_ids
             })
         )
         
@@ -677,20 +787,79 @@ class SpectroscopyClass:
         
         .. dropdown:: Setting filters
             :color: primary
-            :icon: code-square
+            :icon: filter
         
             .. code-block:: python
             
                 # Filtering using target_name
                 target_name = 'TOI178'
                 filters: dict = {'target_name':{'equal': [target_name]}}
+                
+        .. dropdown:: Filtering by DRS version
+                :color: info
+                :icon: filter
 
-        
+                You can restrict which products are returned by specifying the ``drs_version`` argument.
+
+                +------------------------------------+--------------------------------------------------------------------------+
+                | Value                              | Description                                                              |
+                +====================================+==========================================================================+
+                | ``None``                           | Do not filter by DRS version (default)                                   |
+                +------------------------------------+--------------------------------------------------------------------------+
+                | ``'latest'``                       | Select the latest available DRS version                                  |
+                +------------------------------------+--------------------------------------------------------------------------+
+                | ``'DRS-<major>.<minor>.<patch>'``  | Select a specific DRS version                                            |
+                |                                    | (e.g. ``'DRS-3.3.10'`` or ``'3.3.10'`` or ``'DRS-3.3.10-CCF'``)          |
+                +------------------------------------+--------------------------------------------------------------------------+
+
+
+                Example:
+
+                .. code-block:: python
+
+                        from dace_query.spectroscopy import Spectroscopy
+
+                        filters = {'target_name': {'equal': ['TOI178']}}
+                        
+                        # Download CCFs for the latest DRS version available
+                        Spectroscopy.download(filters=filters, file_type='ccf', drs_version='latest')
+                        
+                        # Download S1D products for a specific DRS version (e.g. DRS-3.3.10)
+                        Spectroscopy.download(filters=filters, file_type='s1d', drs_version='DRS-3.3.10')
+                        
+                        # Download S2D products for a specific DRS version with a specifiic extraction method (e.g. DRS-3.3.10-CCF or DRS-3.3.10-SBART)
+                        Spectroscopy.download(filters=filters, file_type='s2d', drs_version='DRS-3.3.10-CCF')
+
+        .. dropdown:: Available file types
+            :color: info
+            :icon: list-unordered
+
+            You can specify the type of files to list using the ``file_type`` argument.
+
+            Available values:
+
+            +----------------------+-----------------------------------+
+            | Value                | Corresponding file types          |
+            +======================+===================================+
+            | ``'s1d'``            | ``S1D_A``, ``S1D_B``              |
+            +----------------------+-----------------------------------+
+            | ``'s2d'``            | ``S2D_A``, ``S2D_B``              |
+            +----------------------+-----------------------------------+
+            | ``'ccf'``            | ``CCF_A``, ``CCF_B``              |
+            +----------------------+-----------------------------------+
+            | ``'all'`` or ``None``| All file types (default)          |
+            +----------------------+-----------------------------------+
+
+            You can also pass exact file types (e.g. ``'S1D_A'`` or ``'CCF_B'``)
+            
+            or a list of exact file types (e.g. ``['S1D_A', 'S1D_B', 'CCF_B']``) to download specific products.
+            
+            
         :param filters: Filters to apply to the query
         :type filters: dict
         :param file_type: The type of files to download
         :type file_type: str
-        :param drs_version: The DRS version of the products to browse (e.g. 'latest')
+        :param drs_version: The DRS version of the products to browse (e.g. ``'latest'`` or specific version in the format ``'DRS-<major>.<minor>.<patch>-<rv_extraction_method>'``)
         :type drs_version: Optional[str]
         :param output_format: Type of data returns
         :type output_format: Optional[str]
@@ -739,32 +908,60 @@ class SpectroscopyClass:
                 from dace_query.spectroscopy import Spectroscopy
                 
                 target_name = 'TOI178'
-                values = Spectroscopy.browse_products(filters={'target_name':{'equal': [target_name]}}, file_type='CCF_A')
+                filters = {'target_name':{'equal': [target_name]}}
+                values = Spectroscopy.browse_products(filters=filters, file_type='CCF_A')
+
+
+        .. dropdown:: Listing all ``ccf`` files for a given target name and the latest DRS version available
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+            
+                from dace_query.spectroscopy import Spectroscopy
                 
+                target_name = 'TOI178'
+                filters = {'target_name':{'equal': [target_name]}}
+                Spectroscopy.browse_products(filters=filters, file_type='ccf', drs_version='latest')
+                
+                
+        .. dropdown:: Listing all ``s1d`` files for a given target name and a specific DRS version (e.g. ``DRS-3.3.10``)
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+            
+                from dace_query.spectroscopy import Spectroscopy
+                
+                target_name = 'TOI178'
+                filters = {'target_name':{'equal': [target_name]}}
+                Spectroscopy.browse_products(filters=filters, file_type='s1d', drs_version='DRS-3.3.10')
         """
         if filters is None:
             filters = {}
             
         # Add support for legacy file type abbreviations (s1d, s2d, ccf, all)
         corrected_file_type = _adapt_legacy_file_type(file_type)
-            
+        
+        drs_ids = []
+        endpoint = 'download/browse'
+        
+        # If the user provided a specific DRS version...
         if drs_version is not None:
+            # Requested the latest DRS version available
             if drs_version == 'latest':
                 endpoint = 'download/browse/latest'
+            # Requested a specific DRS version
             else:
-                # TODO: Implement a way to specify a particular DRS version in the download endpoint (once the API supports it)
-                # Note : We need to provide the API an actual DRS id as DRS versions can be shared across instruments 
-                # and may not be unique, so we cannot just pass the drs_version string as is.
-                endpoint = 'download/browse'
-        else:
-            endpoint = 'download/browse'
+                drs_ids = self._fetch_drs_ids(drs_version)
             
         products = self.dace.request_post(
             api_name=self.__SPECTROSCOPY_API,
             endpoint=endpoint,
             data=json.dumps({
                 'fileType': corrected_file_type,
-                'filters': filters
+                'filters': filters,
+                'drsIds': drs_ids
                 })
         )
         return self.dace.transform_to_format(products, output_format=output_format)
