@@ -7,8 +7,10 @@ import re
 import warnings
 
 from typing import Union, Optional
+from io import BytesIO
 from astropy.coordinates import SkyCoord, Angle
 from astropy.table import Table
+from astropy.io import fits
 from numpy import ndarray
 from pandas import DataFrame
 
@@ -1079,6 +1081,146 @@ class SpectroscopyClass:
         )
         return self.dace.transform_to_format(products, output_format=output_format)
 
+
+
+    def get_guiding_frame(self, spectrum_id: int) -> fits.HDUList:
+        """
+        Retrieve the guiding frame associated with a given raw frame (using the raw frame's unique identifier ``spectrum_id`` to find it).
+        
+        The guiding frame frame is returned as an ``astropy.io.fits.HDUList`` object, which can be manipulated using the astropy library.
+        As such, actual frame data and headers are provided by the API, just like when opening a fits file using astropy's ``fits.open()`` method. 
+        
+        You can for example access the data of the guiding frame using ``guiding_frame[0].data`` and its header using ``guiding_frame[0].header``.
+
+        :param spectrum_id: The unique id of a raw frame to retrieve the guiding frame for
+        :type spectrum_id: int
+        :return: The guiding frame as an astropy.io.fits.HDUList object, or None if no guiding frame is available
+        :rtype: fits.HDUList or None
+
+        .. dropdown:: Getting the guiding frame for a specific spectrum ID
+            :color: success
+            :icon: code-square
+
+            .. code-block:: python
+
+                from dace_query.spectroscopy import Spectroscopy
+                
+                spectrum_id_to_search = 6
+                
+                # This is equivalent to opening the fits file of the guiding frame directly 
+                # and reading its data using fits.open() from astropy.io
+                guiding_frame = Spectroscopy.get_guiding_frame(spectrum_id=spectrum_id_to_search)
+                
+                
+        .. dropdown:: Getting searching for an observation using ``query_database`` and getting its guiding frame
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+            
+                from matplotlib import pyplot as plt
+                from dace_query.spectroscopy import Spectroscopy
+
+                # Set the raw frame filters and fetch the raw frame using query_database
+                file_rootname = 'ESPRE.2018-07-08T08:02:09.755.fits'
+                raw_frame = Spectroscopy.query_database(filters={"file_rootname":{"equals":[file_rootname]}})
+                
+                # Extract the spectrum_id of the first raw frame matching the filters 
+                # (there should only be one in this case since we filtered by file name)
+                spectrum_id = raw_frame.get('spectrum_id')[0]
+
+                # This is equivalent to opening the fits file of the guiding frame directly 
+                # and reading its data using fits.open() from astropy.io
+                guiding_frame = Spectroscopy.get_guiding_frame(spectrum_id)
+                
+        .. dropdown:: Displaying the guiding frame using matplotlib
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+            
+                from matplotlib import pyplot as plt
+                from dace_query.spectroscopy import Spectroscopy
+            
+                # This is equivalent to opening the fits file of the guiding frame directly 
+                # and reading its data using fits.open() from astropy.io
+                guiding_frame = Spectroscopy.get_guiding_frame(spectrum_id=6)
+            
+                # Only plot data if a guiding frame was successfully retrieved
+                if guiding_frame is not None:
+                    
+                    # Extract the data from the first HDU (Header Data Unit) of the fits file
+                    data = guiding_frame[0].data
+
+                    # Display the image using matplotlib
+                    plt.imshow(data, origin='lower', cmap='viridis')
+                    plt.colorbar()
+                    plt.show()
+                    
+        .. dropdown:: Displaying the guiding frame of a perticular point from ``get_timeseries`` using matplotlib
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+            
+                from matplotlib import pyplot as plt
+                from dace_query.spectroscopy import Spectroscopy
+                
+                # Get the spectroscopy timeseries for a target
+                target = 'HR3259'
+
+                # Build the filters to only include points from a specific instrument group (e.g. ESPRESSO)
+                instrument_group_filters = { "instrument_group" : { "equals" : ["ESPRESSO"] } }
+                
+                # Get the timeseries for that target with the instrument group filters applied
+                timeseries = Spectroscopy.get_timeseries(target=target, filters=instrument_group_filters, sorted_by_instrument=True)
+
+                # Extract the spectrum_id of a particular point in the timeseries (for example the first point of the first instrument/DRS/mode available)
+                first_instrument = next(iter(timeseries))
+                first_drs = next(iter(timeseries[first_instrument]))
+                first_ins_mode = next(iter(timeseries[first_instrument][first_drs]))
+                
+                # For this example, we simply get the spectrum_id of the first point in the timeseries, 
+                # but you can of course select any point you want based on the available metadata (e.g. rjd, rv, etc.) 
+                # and get its spectrum_id to retrieve the corresponding guiding frame
+                spectrum_id = timeseries[first_instrument][first_drs][first_ins_mode]['spectrum_id'][0]
+
+                # This is equivalent to opening the fits file of the guiding frame directly 
+                # and reading its data using fits.open() from astropy.io
+                guiding_frame = Spectroscopy.get_guiding_frame(spectrum_id=spectrum_id)
+
+                # Only plot data if a guiding frame was successfully retrieved
+                if guiding_frame is not None:
+
+                    # Extract the data from the first HDU (Header Data Unit) of the fits file
+                    data = guiding_frame[0].data
+
+                    # Display the image using matplotlib
+                    plt.imshow(data, origin='lower', cmap='viridis')
+                    plt.colorbar()
+                    plt.show()
+        """
+        response = self.dace.request_get(
+            api_name=self.__SPECTROSCOPY_API,
+            endpoint=f'guiding/{spectrum_id}',
+            raw_response=True
+        )
+        
+        if not response:
+            self.log.warning(f"No guiding frame available for spectrum_id {spectrum_id}.")
+            return None
+        
+        
+        # Response contains the binary data of the guiding frame fits file, we can read it using astropy.io.fits
+        try:
+            hdul = fits.open(BytesIO(response))
+        except Exception as e:
+            self.log.error(f"Failed to read guiding frame for spectrum_id {spectrum_id}: {e}")
+            return None
+        
+        return hdul
+        
+    
 Spectroscopy: SpectroscopyClass = SpectroscopyClass()
 """
 This is a singleton instance of the :class:`SpectroscopyClass` class.
