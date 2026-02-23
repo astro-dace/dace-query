@@ -1,5 +1,4 @@
 import sys
-import warnings
 
 major, minor, micro = sys.version_info.major, sys.version_info.minor, sys.version_info.micro
 
@@ -33,5 +32,4 @@ if "dev" in __version__ or "rc" in __version__:
         f"{'!'*60}\n"
     )
     
-    # UserWarning is standard, but you can use simple print() if you prefer
-    warnings.warn(WARNING_MSG, UserWarning, stacklevel=2)
+    print(WARNING_MSG)
