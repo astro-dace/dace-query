@@ -191,8 +191,6 @@ class SpectroscopyClass:
             :color: primary
             :icon: filter
 
-            Here is a list of available fields for filtering (see :doc:`query_options`):
-
             .. include:: _includes/spectroscopy_filters_table.rst
 
         All available formats are defined in this section (see :doc:`output_format`).
@@ -249,8 +247,6 @@ class SpectroscopyClass:
         .. dropdown:: Available fields for ``filters`` argument
             :color: primary
             :icon: filter
-
-            You can filter on any field available for a raw frame in :meth:`query_database`, see :
             
             .. include:: _includes/spectroscopy_filters_table.rst
 
@@ -309,8 +305,6 @@ class SpectroscopyClass:
         .. dropdown:: Available fields for ``filters`` argument
             :color: primary
             :icon: filter
-
-            You can filter on any field available for a raw frame in :meth:`query_database`, see :
             
             .. include:: _includes/spectroscopy_filters_table.rst
 
@@ -610,8 +604,6 @@ class SpectroscopyClass:
         .. dropdown:: Available fields for ``filters`` argument
             :color: primary
             :icon: filter
-
-            You can filter on any field available for a raw frame in :meth:`get_timeseries`, see :
             
             .. include:: _includes/spectroscopy_rv_filters_table.rst
 
@@ -886,8 +878,6 @@ class SpectroscopyClass:
         .. dropdown:: Available fields for ``filters`` argument
             :color: primary
             :icon: filter
-
-            You can filter on any field available for a raw frame in :meth:`query_database`, see :
             
             .. include:: _includes/spectroscopy_filters_table.rst
                 
