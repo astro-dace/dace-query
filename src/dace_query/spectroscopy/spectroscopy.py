@@ -65,21 +65,7 @@ class Source(Enum):
         Some DRS or postprocesses may be marked as ``Private`` if they are not publicly available.
         To access private data, ensure you have the necessary permissions and `authentication <dace_introduction.html#authentication>`_.
 
-        +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
-        | Name                      | Value                     | Description                                                                                | Public/Private |
-        +===========================+===========================+============================================================================================+================+
-        | ``STANDARD_PROCESSING``   | ``"POSTDRS_A"``           | Standard DRS pipeline processing, RVs extracted from CCF. **(default)**                    | ``Public``     |
-        +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
-        | ``TELLURIC_CORRECTION``   | ``"POSTDRS_TELL_CORR_A"`` | Standard DRS pipeline processing, RVs extracted from CCF with telluric correction applied. | ``Public``     |
-        +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
-        | ``SKYSUB``                | ``"POSTDRS_SKYSUB_A"``    | Standard DRS pipeline processing, RVs extracted from CCF with sky subtraction applied.     | ``Public``     |
-        +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
-        | ``PUBLICATION``           | ``"PUB"``                 | RVs imported from publications. **(default)**                                              | ``Public``     |
-        +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
-        | ``SBART``                 | ``"SBART"``               | RVs extracted using the SBART method.                                                      | ``Private``    |
-        +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
-        | ``LBL``                   | ``"LBL"``                 | RVs extracted using the LBL method.                                                        | ``Private``    |
-        +---------------------------+---------------------------+--------------------------------------------------------------------------------------------+----------------+
+        .. include:: _includes/spectroscopy_source_table.rst
         
     .. dropdown:: Filtering radial velocity time series data by source
         :color: info
@@ -196,8 +182,18 @@ class SpectroscopyClass:
                        output_format: Optional[str] = None) -> Union[dict[str, ndarray], DataFrame, Table, dict]:
         """
         Query the spectroscopy database to retrieve data in the chosen format.
+        The spectroscopy database contains metadata of raw frames. 
+        Use this method to search for observations matching specific criteria (e.g. target name, date, instrument, program id, etc.)
 
         Filters and sorting order can be applied to the query via named arguments (see :doc:`query_options`).
+
+        .. dropdown:: Available fields for ``filters`` argument
+            :color: primary
+            :icon: filter
+
+            Here is a list of available fields for filtering (see :doc:`query_options`):
+
+            .. include:: _includes/spectroscopy_filters_table.rst
 
         All available formats are defined in this section (see :doc:`output_format`).
 
@@ -249,6 +245,14 @@ class SpectroscopyClass:
         Query a region, based on SkyCoord and Angle objects, in the spectroscopy database and retrieve data in the chosen format.
 
         Filters can be applied to the query via named arguments (see :doc:`query_options`).
+
+        .. dropdown:: Available fields for ``filters`` argument
+            :color: primary
+            :icon: filter
+
+            You can filter on any field available for a raw frame in :meth:`query_database`, see :
+            
+            .. include:: _includes/spectroscopy_filters_table.rst
 
         All available formats are defined in this section (see :doc:`output_format`).
 
@@ -302,32 +306,22 @@ class SpectroscopyClass:
         **Filters** can be applied to the query via the ``filters`` argument (see :doc:`query_options`).
         You can filter on any field available for a raw frame in :meth:`query_database` (e.g. ``target_name``, ``spectrum_id``, ``date_night``, ``file_rootname``, ...).
         
-        .. dropdown:: Setting filters
+        .. dropdown:: Available fields for ``filters`` argument
             :color: primary
             :icon: filter
-        
-            .. code-block:: python
+
+            You can filter on any field available for a raw frame in :meth:`query_database`, see :
             
-                # Filtering using target_name
-                target_name = 'TOI178'
-                filters: dict = {'target_name':{'equal': [target_name]}}
-                
+            .. include:: _includes/spectroscopy_filters_table.rst
+
+
         .. dropdown:: Filtering by DRS version
                 :color: info
                 :icon: filter
 
                 You can restrict which products are returned by specifying the ``drs_version`` argument.
                 
-                +------------------------------------+--------------------------------------------------------------------------+
-                | Value                              | Description                                                              |
-                +====================================+==========================================================================+
-                | ``None``                           | Do not filter by DRS version (default)                                   |
-                +------------------------------------+--------------------------------------------------------------------------+
-                | ``'latest'``                       | Select the latest available DRS version                                  |
-                +------------------------------------+--------------------------------------------------------------------------+
-                | ``'DRS-<major>.<minor>.<patch>'``  | Select a specific DRS version                                            |
-                |                                    | (e.g. ``'DRS-3.3.10'`` or ``'3.3.10'`` or ``'DRS-3.3.10-CCF'``)          |
-                +------------------------------------+--------------------------------------------------------------------------+
+                .. include:: _includes/spectroscopy_drs_version_table.rst
 
 
                 Example:
@@ -355,17 +349,7 @@ class SpectroscopyClass:
 
             Available values:
 
-            +----------------------+-----------------------------------+
-            | Value                | Corresponding file types          |
-            +======================+===================================+
-            | ``'s1d'``            | ``S1D_A``, ``S1D_B``              |
-            +----------------------+-----------------------------------+
-            | ``'s2d'``            | ``S2D_A``, ``S2D_B``              |
-            +----------------------+-----------------------------------+
-            | ``'ccf'``            | ``CCF_A``, ``CCF_B``              |
-            +----------------------+-----------------------------------+
-            | ``'all'`` or ``None``| All file types (default)          |
-            +----------------------+-----------------------------------+
+            .. include:: _includes/spectroscopy_file_types_table.rst
 
             You can also pass exact file types (e.g. ``'S1D_A'`` or ``'CCF_B'``)
             
@@ -623,6 +607,14 @@ class SpectroscopyClass:
 
         Filters can be applied to the query via named arguments (see :doc:`query_options`).
 
+        .. dropdown:: Available fields for ``filters`` argument
+            :color: primary
+            :icon: filter
+
+            You can filter on any field available for a raw frame in :meth:`get_timeseries`, see :
+            
+            .. include:: _includes/spectroscopy_rv_filters_table.rst
+
         All available formats are defined in this section (see :doc:`output_format`).
         
         Using ``sorted_by_instrument=True`` will sort the results by ``instrument → DRS version → instrument mode``
@@ -703,16 +695,7 @@ class SpectroscopyClass:
 
             You can further restrict which series are returned by specifying the ``drs_version`` argument.            
 
-            +------------------------------------+--------------------------------------------------------------------------+
-            | Value                              | Description                                                              |
-            +====================================+==========================================================================+
-            | ``None``                           | Do not filter by DRS version (default)                                   |
-            +------------------------------------+--------------------------------------------------------------------------+
-            | ``'latest'``                       | Select the latest available DRS version per instrument                   |
-            +------------------------------------+--------------------------------------------------------------------------+
-            | ``'DRS-<major>.<minor>.<patch>'``  | Select a specific DRS version                                            |
-            |                                    | (e.g. ``'DRS-3.3.10'`` or ``'3.3.10'`` or ``'DRS-3.3.10-CCF'``)          |
-            +------------------------------------+--------------------------------------------------------------------------+
+            .. include:: _includes/spectroscopy_drs_version_table.rst
 
             Example:
 
@@ -900,15 +883,13 @@ class SpectroscopyClass:
         **Filters** can be applied to the query via the ``filters`` argument (see :doc:`query_options`).
         You can filter on any field available for a raw frame in :meth:`query_database` (e.g. ``target_name``, ``spectrum_id``, ``date_night``, ``file_rootname``, ...).
         
-        .. dropdown:: Setting filters
+        .. dropdown:: Available fields for ``filters`` argument
             :color: primary
             :icon: filter
-        
-            .. code-block:: python
+
+            You can filter on any field available for a raw frame in :meth:`query_database`, see :
             
-                # Filtering using target_name
-                target_name = 'TOI178'
-                filters: dict = {'target_name':{'equal': [target_name]}}
+            .. include:: _includes/spectroscopy_filters_table.rst
                 
         .. dropdown:: Filtering by DRS version
                 :color: info
@@ -916,16 +897,7 @@ class SpectroscopyClass:
 
                 You can restrict which products are returned by specifying the ``drs_version`` argument.
 
-                +------------------------------------+--------------------------------------------------------------------------+
-                | Value                              | Description                                                              |
-                +====================================+==========================================================================+
-                | ``None``                           | Do not filter by DRS version (default)                                   |
-                +------------------------------------+--------------------------------------------------------------------------+
-                | ``'latest'``                       | Select the latest available DRS version                                  |
-                +------------------------------------+--------------------------------------------------------------------------+
-                | ``'DRS-<major>.<minor>.<patch>'``  | Select a specific DRS version                                            |
-                |                                    | (e.g. ``'DRS-3.3.10'`` or ``'3.3.10'`` or ``'DRS-3.3.10-CCF'``)          |
-                +------------------------------------+--------------------------------------------------------------------------+
+                .. include:: _includes/spectroscopy_drs_version_table.rst
 
 
                 Example:
@@ -953,17 +925,7 @@ class SpectroscopyClass:
 
             Available values:
 
-            +----------------------+-----------------------------------+
-            | Value                | Corresponding file types          |
-            +======================+===================================+
-            | ``'s1d'``            | ``S1D_A``, ``S1D_B``              |
-            +----------------------+-----------------------------------+
-            | ``'s2d'``            | ``S2D_A``, ``S2D_B``              |
-            +----------------------+-----------------------------------+
-            | ``'ccf'``            | ``CCF_A``, ``CCF_B``              |
-            +----------------------+-----------------------------------+
-            | ``'all'`` or ``None``| All file types (default)          |
-            +----------------------+-----------------------------------+
+            .. include:: _includes/spectroscopy_file_types_table.rst
 
             You can also pass exact file types (e.g. ``'S1D_A'`` or ``'CCF_B'``)
             
