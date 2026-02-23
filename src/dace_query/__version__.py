@@ -1,4 +1,5 @@
 import sys
+import warnings
 
 major, minor, micro = sys.version_info.major, sys.version_info.minor, sys.version_info.micro
 
@@ -19,3 +20,18 @@ except PackageNotFoundError:
     __version__ = '0.0.0-dev'
 
 __py_version__ = '.'.join(map(str, [major, minor, micro]))
+
+
+# If we are in a pre-release version, we want to warn the user that this version is for testing purposes only and implies no support.
+if "dev" in __version__ or "rc" in __version__:
+    WARNING_MSG = (
+        f"\n{'!'*60}\n"
+        f"DISCLAIMER: You are using a PRE-RELEASE version ({__version__}).\n"
+        "This version is for testing purposes only and implies NO SUPPORT. (breaking changes may occur between pre-releases)\n"
+        "It is not recommended to use this version of dace-query for any scientific work.\n"
+        "You may install the stable version via: pip install dace-query\n"
+        f"{'!'*60}\n"
+    )
+    
+    # UserWarning is standard, but you can use simple print() if you prefer
+    warnings.warn(WARNING_MSG, UserWarning, stacklevel=2)
