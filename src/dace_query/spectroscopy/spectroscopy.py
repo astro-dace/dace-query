@@ -782,7 +782,23 @@ class SpectroscopyClass:
                 
                 timeseries = Spectroscopy.get_timeseries(target=target_to_search, filters=filters_to_use)
         
-        .. dropdown:: Getting spectroscopy timeseries for a target with results sorted by <instrument>/<drs>/<instrument_mode>
+        .. dropdown:: Getting spectroscopy timeseries with points that pass the DRS quality check (``drs_qc = True``)
+            :color: success
+            :icon: code-square
+            
+            .. code-block:: python
+            
+                from dace_query.spectroscopy import Spectroscopy
+            
+                target_to_search = "HR3259"
+                filters_to_use = dict(
+                    drs_qc=dict(is=True)
+                )
+                
+                timeseries = Spectroscopy.get_timeseries(target=target_to_search, filters=filters_to_use)
+
+
+        .. dropdown:: Getting spectroscopy timeseries for a target with results sorted by ``<instrument>`` → ``<drs>`` → ``<instrument_mode>``
             :color: success
             :icon: code-square
             
@@ -811,7 +827,7 @@ class SpectroscopyClass:
                 from dace_query.spectroscopy import Spectroscopy
                     timeseries = Spectroscopy.get_timeseries('HR3259', rv_sources=[Spectroscopy.Source.SKYSUB, Spectroscopy.Source.TELLURIC_CORRECTION])
                 
-
+    
         """
         if filters is None:
             filters = {}
