@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import numpy as np
 import pytest
 from astropy.coordinates import Angle, SkyCoord
 
@@ -133,6 +134,108 @@ def test_spectroscopy_browse(instance, file, request):
         ),
     ],
 )
+def test_spectroscopy_browse_latest_drs(instance, file, request):
+    dace_instance: DaceClass = request.getfixturevalue(instance)
+    instance : SpectroscopyClass = SpectroscopyClass(dace_instance=dace_instance)
+    filters = {"file_rootname": {"equal": [file]}}
+    
+    products_df = instance.browse_products(
+        filters=filters,
+        file_type="S1D_A",
+        output_format="pandas"
+    )
+    
+    products_latest_drs_df =  instance.browse_products(
+        filters=filters,
+        file_type="S1D_A",
+        drs_version="latest",
+        output_format="pandas"
+    )
+    
+    assert not products_df.empty and not products_latest_drs_df.empty
+    
+    # Check that we've got a file extension in the results that matches the expected file type
+    assert all(product_file_ext == "S1D_A" for product_file_ext in products_df["file_ext"])
+    assert all(product_file_ext == "S1D_A" for product_file_ext in products_latest_drs_df["file_ext"])
+    
+    expected = products_df.sort_values(
+        by=['version_major', 'version_minor', 'version_patch'], 
+        ascending=False
+    ).iloc[0]
+    
+    expected_major = expected['version_major']
+    expected_minor = expected['version_minor']
+    expected_patch = expected['version_patch']
+    
+    actual_major = products_latest_drs_df.iloc[0]['version_major']
+    actual_minor = products_latest_drs_df.iloc[0]['version_minor']
+    actual_patch = products_latest_drs_df.iloc[0]['version_patch']
+    
+    assert (expected_major, expected_minor, expected_patch) == (actual_major, actual_minor, actual_patch)
+    
+@pytest.mark.parametrize(
+    "instance, file, expected_major, expected_minor, expected_patch",
+    [
+        pytest.param(
+            "anon_dace_instance",
+            "HARPS.2016-03-09T02:55:16.776.fits",
+            "3", 
+            "3", 
+            "6",
+            marks=pytest.mark.xfail,
+        ),
+        pytest.param(
+            "admin_dace_instance",
+            "HARPS.2016-03-09T02:55:16.776.fits",
+            "3", 
+            "3", 
+            "6",
+        ),
+    ],
+)
+def test_spectroscopy_browse_specific_drs(instance, file, expected_major, expected_minor, expected_patch, request):
+    dace_instance: DaceClass = request.getfixturevalue(instance)
+    instance : SpectroscopyClass = SpectroscopyClass(dace_instance=dace_instance)
+    filters = {"file_rootname": {"equal": [file]}}
+    
+    version_str = f"DRS-{expected_major}.{expected_minor}.{expected_patch}"
+    
+    products_df = instance.browse_products(
+        filters=filters,
+        file_type="S1D_A",
+        drs_version=version_str,
+        output_format="pandas"
+    )
+    
+    assert not products_df.empty
+    
+    # Check that we've got a file extension in the results that matches the expected file type
+    assert all(product_file_ext == "S1D_A" for product_file_ext in products_df["file_ext"])
+    
+    # Extract all DRS versions
+    majors = products_df['version_major']
+    minors = products_df['version_minor']
+    patches = products_df['version_patch']
+    
+    assert all((expected_major == str(major) for major in majors))
+    assert all((expected_minor == str(minor) for minor in minors))
+    assert all((expected_patch == str(patch) for patch in patches))
+
+
+@pytest.mark.parametrize(
+    "instance, file",
+    [
+        pytest.param(
+            "anon_dace_instance",
+            "HARPS.2016-03-09T02:55:16.776.fits",
+            marks=pytest.mark.xfail,
+        ),
+        pytest.param(
+            "admin_dace_instance",
+            "HARPS.2016-03-09T02:55:16.776.fits",
+        ),
+    ],
+)
 def test_spectroscopy_browse_shorthand(instance, file, request):
     dace_instance: DaceClass = request.getfixturevalue(instance)
     instance : SpectroscopyClass = SpectroscopyClass(dace_instance=dace_instance)
@@ -194,7 +297,7 @@ def test_spectroscopy_download(instance, file, request):
         ),
     ],
 )
-def test_spectroscopy_download_with_shorthand(instance, file, request):
+def test_spectroscopy_download_shorthand(instance, file, request):
     dace_instance: DaceClass = request.getfixturevalue(instance)
     instance : SpectroscopyClass = SpectroscopyClass(dace_instance=dace_instance)
     filters = {"file_rootname": {"equal": [file]}}
@@ -350,3 +453,105 @@ def test_spectroscopy_get_timeseries_keys(instance, target, request):
     ]
     # Check if all parameters are returned
     assert all((key in results.keys()) for key in expected_keys)
+
+
+@pytest.mark.parametrize(
+    "instance, target",
+    [
+        pytest.param("anon_dace_instance", "HD40307", marks=pytest.mark.xfail),
+        pytest.param("admin_dace_instance", "SW0604-1658"),
+    ],
+)
+def test_spectroscopy_get_timeseries_sorted_by_instrument(instance, target, request):
+    dace_instance: DaceClass = request.getfixturevalue(instance)
+    instance = SpectroscopyClass(dace_instance=dace_instance)
+
+    results = instance.get_timeseries(
+        target, sorted_by_instrument=True
+    )
+    # Result is not empty
+    assert results
+
+    # Check that we have a dict of dict of dict (instrument -> drs -> instrument_mode)
+    first_instrument = list(results.keys())[0]
+    first_drs = list(results[first_instrument].keys())[0]
+    first_instrument_mode = list(results[first_instrument][first_drs].keys())[0]
+    
+    # Check that we have the expected structure
+    assert isinstance(results, dict)
+    assert isinstance(results[first_instrument], dict)
+    assert isinstance(results[first_instrument][first_drs], dict)
+    assert isinstance(results[first_instrument][first_drs][first_instrument_mode], dict)
+    assert "rv" in results[first_instrument][first_drs][first_instrument_mode].keys()
+    
+    
+@pytest.mark.parametrize(
+    "instance, target",
+    [
+        pytest.param("admin_dace_instance", "HD40307"),
+    ],
+)
+def test_spectroscopy_get_timeseries_latest_drs(instance: SpectroscopyClass, target, request):
+    instance = SpectroscopyClass(dace_instance=request.getfixturevalue("admin_dace_instance"))
+    
+    # Only get HARPS03 data for this target
+    filters = {
+        "instrument_name": {"equal": ["HARPS03"]},
+    }
+    
+    results_latest = instance.get_timeseries(target=target, filters=filters, output_format="pandas", sorted_by_instrument=False, drs_version="latest")
+    results_all = instance.get_timeseries(target=target, filters=filters, output_format="pandas", sorted_by_instrument=False)
+
+    assert not results_latest.empty and not results_all.empty
+    
+    # Sort the results by DRS version and get the latest one from the full results 
+    expected = results_all.sort_values(
+        by=['version_major', 'version_minor', 'version_patch'], 
+        ascending=False
+    ).iloc[0]
+    
+    expected_major = expected['version_major']
+    expected_minor = expected['version_minor']
+    expected_patch = expected['version_patch']
+    
+    actual_major = results_latest.iloc[0]['version_major']
+    actual_minor = results_latest.iloc[0]['version_minor']
+    actual_patch = results_latest.iloc[0]['version_patch']
+    
+    assert (expected_major, expected_minor, expected_patch) == (actual_major, actual_minor, actual_patch)
+    
+@pytest.mark.parametrize(
+    "instance, target, instrument_version, expected_major, expected_minor, expected_patch",
+    [
+        pytest.param(
+            "anon_dace_instance",
+            "HD40307",
+            "HARPS03",
+            "3", 
+            "3", 
+            "6",
+            marks=pytest.mark.xfail,
+        )
+    ],
+)
+
+def test_spectroscopy_get_timeseries_specific_drs(instance, target, instrument_version, expected_major, expected_minor, expected_patch, request):
+    instance = SpectroscopyClass(dace_instance=request.getfixturevalue("admin_dace_instance"))
+    
+    # Only get HARPS03 data for this target
+    filters = {
+        "instrument_name": {"equal": [instrument_version]},
+    }
+    
+    results = instance.get_timeseries(target=target, filters=filters, output_format="pandas", sorted_by_instrument=False, drs_version=f"DRS-{expected_major}.{expected_minor}.{expected_patch}")
+
+    assert not results.empty
+    
+    # Check that all the results have the expected DRS version
+    majors = results['version_major']
+    minors = results['version_minor']
+    patches = results['version_patch']
+    
+    assert all((expected_major == str(major) for major in majors))
+    assert all((expected_minor == str(minor) for minor in minors))
+    assert all((expected_patch == str(patch) for patch in patches))
