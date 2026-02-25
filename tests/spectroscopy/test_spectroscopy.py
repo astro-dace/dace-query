@@ -3,6 +3,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 from astropy.coordinates import Angle, SkyCoord
+from astropy.io import fits
+from astropy.io.fits import HDUList
 
 from dace_query import DaceClass
 from dace_query.spectroscopy import SpectroscopyClass
@@ -95,12 +97,12 @@ def test_spectroscopy_query_region(instance, sky_coord, expected_target: str, re
     [
         pytest.param(
             "anon_dace_instance",
-            "HARPS.2016-03-09T02:55:16.776.fits",
+            "NIRPS.2022-11-29T05:06:14.564.fits",
             marks=pytest.mark.xfail,
         ),
         pytest.param(
             "admin_dace_instance",
-            "HARPS.2016-03-09T02:55:16.776.fits",
+            "NIRPS.2022-11-29T05:06:14.564.fits",
         ),
     ],
 )
@@ -125,12 +127,12 @@ def test_spectroscopy_browse(instance, file, request):
     [
         pytest.param(
             "anon_dace_instance",
-            "HARPS.2016-03-09T02:55:16.776.fits",
+            "NIRPS.2022-11-29T05:06:14.564.fits",
             marks=pytest.mark.xfail,
         ),
         pytest.param(
             "admin_dace_instance",
-            "HARPS.2016-03-09T02:55:16.776.fits",
+            "NIRPS.2022-11-29T05:06:14.564.fits",
         ),
     ],
 )
@@ -178,18 +180,18 @@ def test_spectroscopy_browse_latest_drs(instance, file, request):
     [
         pytest.param(
             "anon_dace_instance",
-            "HARPS.2016-03-09T02:55:16.776.fits",
+            "NIRPS.2022-11-29T05:06:14.564.fits",
             "3", 
             "3", 
-            "6",
+            "12",
             marks=pytest.mark.xfail,
         ),
         pytest.param(
             "admin_dace_instance",
-            "HARPS.2016-03-09T02:55:16.776.fits",
+            "NIRPS.2022-11-29T05:06:14.564.fits",
             "3", 
             "3", 
-            "6",
+            "12",
         ),
     ],
 )
@@ -227,12 +229,12 @@ def test_spectroscopy_browse_specific_drs(instance, file, expected_major, expect
     [
         pytest.param(
             "anon_dace_instance",
-            "HARPS.2016-03-09T02:55:16.776.fits",
+            "NIRPS.2022-11-29T05:06:14.564.fits",
             marks=pytest.mark.xfail,
         ),
         pytest.param(
             "admin_dace_instance",
-            "HARPS.2016-03-09T02:55:16.776.fits",
+            "NIRPS.2022-11-29T05:06:14.564.fits",
         ),
     ],
 )
@@ -258,12 +260,12 @@ def test_spectroscopy_browse_shorthand(instance, file, request):
     [
         pytest.param(
             "anon_dace_instance",
-            "HARPS.2016-03-09T02:55:16.776.fits",
+            "NIRPS.2022-11-29T05:06:14.564.fits",
             marks=pytest.mark.xfail,
         ),
         pytest.param(
             "admin_dace_instance",
-            "HARPS.2016-03-09T02:55:16.776.fits",
+            "NIRPS.2022-11-29T05:06:14.564.fits",
         ),
     ],
 )
@@ -288,12 +290,12 @@ def test_spectroscopy_download(instance, file, request):
     [
         pytest.param(
             "anon_dace_instance",
-            "HARPS.2016-03-09T02:55:16.776.fits",
+            "NIRPS.2022-11-29T05:06:14.564.fits",
             marks=pytest.mark.xfail,
         ),
         pytest.param(
             "admin_dace_instance",
-            "HARPS.2016-03-09T02:55:16.776.fits",
+            "NIRPS.2022-11-29T05:06:14.564.fits",
         ),
     ],
 )
@@ -347,7 +349,7 @@ def test_spectroscopy_download_files(instance, files, request):
     "instance, target",
     [
         pytest.param("anon_dace_instance", "HD40307", marks=pytest.mark.xfail),
-        pytest.param("admin_dace_instance", "SW0604-1658"),
+        pytest.param("admin_dace_instance", "HD40307"),
     ],
 )
 def test_spectroscopy_get_timeseries_keys(instance, target, request):
@@ -459,7 +461,7 @@ def test_spectroscopy_get_timeseries_keys(instance, target, request):
     "instance, target",
     [
         pytest.param("anon_dace_instance", "HD40307", marks=pytest.mark.xfail),
-        pytest.param("admin_dace_instance", "SW0604-1658"),
+        pytest.param("admin_dace_instance", "HD40307"),
     ],
 )
 def test_spectroscopy_get_timeseries_sorted_by_instrument(instance, target, request):
@@ -555,3 +557,35 @@ def test_spectroscopy_get_timeseries_specific_drs(instance, target, instrument_v
     assert all((expected_major == str(major) for major in majors))
     assert all((expected_minor == str(minor) for minor in minors))
     assert all((expected_patch == str(patch) for patch in patches))
+    
+@pytest.mark.parametrize(
+    "instance, raw_frame_filerootname",
+    [
+        pytest.param("anon_dace_instance", "HARPS.2015-04-19T23:55:59.061.fits", marks=pytest.mark.xfail),
+        pytest.param("admin_dace_instance", "HARPS.2015-04-19T23:55:59.061.fits"),
+    ],
+)
+def test_spectroscopy_get_guiding_frame(instance: SpectroscopyClass, raw_frame_filerootname, request):
+    instance = SpectroscopyClass(dace_instance=request.getfixturevalue("admin_dace_instance"))
+    filters = {"file_rootname": {"contains": [raw_frame_filerootname]}}
+    
+    raw_frames = instance.query_database(filters=filters, output_format="dict")
+
+    assert raw_frames
+    
+    # Check that it has a guiding frame using the flag
+    has_guiding_frame = raw_frames["has_guiding_frame"][0]
+    assert has_guiding_frame
+    
+    spectrum_id = raw_frames["spectrum_id"][0]
+    
+    guiding_frame: HDUList = instance.get_guiding_frame(spectrum_id=spectrum_id)
+    
+    # Check that the guiding frame returned is a valid .fits file
+    guiding_frame.verify("exception")
+    
+    # Check if there is data in primary HDU
+    data = guiding_frame[0].data
+    
+    assert data is not None
+    
