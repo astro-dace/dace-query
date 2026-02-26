@@ -143,9 +143,9 @@ class SpectroscopyClass:
         self.log = logger
 
 
-    def _fetch_drs_ids(self, drs_version: Union[str, list[str]]) -> list[str]:
+    def _fetch_drs(self, drs_version: Union[str, list[str]], output_format: Optional[str] = None) -> list[str]:
         """
-        Return the DRS IDs that match a DRS version string.
+        Return the DRS that match a DRS version string.
 
         The input can be written in several common formats, for example:
 
@@ -171,8 +171,15 @@ class SpectroscopyClass:
             }
         )
         
-        drs = self.dace.transform_to_format(drs, output_format='dict')
+        return self.dace.transform_to_format(drs, output_format=output_format)
         
+
+    def _fetch_drs_ids(self, drs_version: Union[str, list[str]]) -> list[str]:
+        """
+        Return the DRS IDs that match a DRS version string.
+        See the ``_fetch_drs`` method for accepted input formats.
+        """
+        drs = self._fetch_drs(drs_version=drs_version, output_format='dict')
         return drs.get('drs_id', [])
 
     def query_database(self,
@@ -914,14 +921,14 @@ class SpectroscopyClass:
 
                         filters = {'target_name': {'equal': ['TOI178']}}
                         
-                        # Download CCFs for the latest DRS version available
-                        Spectroscopy.download(filters=filters, file_type='ccf', drs_version='latest')
+                        # List CCF files for the latest DRS version available
+                        products = Spectroscopy.browse_products(filters=filters, file_type='ccf', drs_version='latest')
                         
-                        # Download S1D products for a specific DRS version (e.g. DRS-3.3.10)
-                        Spectroscopy.download(filters=filters, file_type='s1d', drs_version='DRS-3.3.10')
+                        # List S1D files for a specific DRS version (e.g. DRS-3.3.10)
+                        products = Spectroscopy.browse_products(filters=filters, file_type='s1d', drs_version='DRS-3.3.10')
                         
-                        # Download S2D products for a specific DRS version with a specifiic extraction method (e.g. DRS-3.3.10-CCF or DRS-3.3.10-SBART)
-                        Spectroscopy.download(filters=filters, file_type='s2d', drs_version='DRS-3.3.10-CCF')
+                        # List S2D files products for a specific DRS version with a specifiic extraction method (e.g. DRS-3.3.10-CCF or DRS-3.3.10-SBART)
+                        products = Spectroscopy.browse_products(filters=filters, file_type='s2d', drs_version='DRS-3.3.10-CCF')
 
         .. dropdown:: Filtering file types
             :color: info
