@@ -169,6 +169,37 @@ def test_sun_download_public_release_timeseries_invalid_period(instance, period,
     assert "The only available period is" in str(excinfo.value)
 
 
+def is_dace_reachable():
+    '''
+    Helper function to check if the DACE server is reachable from the current environment.
+    This is because the tests will run from a gitlab runner inside the same cluster as the DACE webapp.
+    Causing issues with name resolution
+    '''
+    try:
+        is_ok = requests.head("https://dace.unige.ch/", timeout=5, verify=False).status_code == 200
+        return is_ok
+    except requests.exceptions.RequestException as e:
+        print(f"Error reaching DACE server: {e}")
+        return False
+
+@pytest.mark.skipif(not is_dace_reachable(), reason="DACE server is not reachable")
+@pytest.mark.parametrize(
+    "instance, period",
+    [pytest.param("anon_dace_instance", "2015-2018")],
+)
+def test_sun_download_public_release_timeseries_valid_period(instance, period, request: pytest.FixtureRequest):
+    dace_instance: DaceClass = request.getfixturevalue(instance)
+    instance : SunClass = SunClass(dace_instance=dace_instance)
+
+
+    instance.download_public_release_timeseries(period=period, output_directory="/tmp", output_filename="sun_timeseries.tar.gz")
+    
+    assert Path("/tmp/sun_timeseries.tar.gz").exists()
+    Path("/tmp/sun_timeseries.tar.gz").unlink(missing_ok=True)
+
+
+
+@pytest.mark.skipif(not is_dace_reachable(), reason="DACE server is not reachable")
 @pytest.mark.parametrize(
     "instance, func_name, args, expected_url_pattern",
     [
@@ -198,6 +229,8 @@ def test_sun_download_public_release_timeseries_invalid_period(instance, period,
         ),
     ],
 )
+
+@pytest.mark.skipif(not is_dace_reachable(), reason="DACE server is not reachable")
 def test_sun_public_release_urls_reachable(instance, func_name, args, expected_url_pattern, request: pytest.FixtureRequest, monkeypatch):
     dace_instance: DaceClass = request.getfixturevalue(instance)
     instance = SunClass(dace_instance=dace_instance)
