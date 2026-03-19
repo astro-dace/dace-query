@@ -394,9 +394,6 @@ class DaceClass:
                     data['rv_extraction_method'],
                 )
             ]
-            # Remove these entries from data to keep only user-facing fields
-            for key in ('version_major', 'version_minor', 'version_patch', 'rv_extraction_method'):
-                data.pop(key, None)
         else:
             drs_versions = None
         
