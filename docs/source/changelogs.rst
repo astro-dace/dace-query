@@ -2,17 +2,49 @@ Changelogs
 #################
 
 
-.. dropdown:: 2.0.0 ``current``
+.. dropdown:: 3.0.0 ``current``
     :open:
     :animate: fade-in-slide-down
     :color: info
     :icon: sparkle-fill
 
+
+    * **Summary**
+        * Version 3.0.0 introduces breaking changes as it transitions to a new backend for Spectroscopy.
+        * The Spectroscopy download module has been reworked; as such, some functions are now deprecated.
+
+    * **Spectroscopy Module**
+        * Transitioned to a new backend for the Spectroscopy module. 
+        * Reworked :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.query_database` :
+            * Now returns a list of raw frames instead of available points per instrument and per DRS version.
+            * Targets (``target_name``) are now resolved automatically using SIMBAD.
+            * Calibration frames are now included in the query results.
+        * Reworked download functionalities:
+            * Deprecated :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.download_files` in favor of :
+                * :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.browse_products` to preview available reduced products
+                * :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.download` to download reduced products.
+            * Added the ability to specify the DRS version of the data to download using the ``drs_version`` parameter (e.g., ``drs_version='latest'``).
+        * Reworked :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.get_timeseries` :
+            * Added support for querying specific radial velocity sources (e.g., telluric corrected, sky-sub, publication data) using the new ``rv_source`` parameter.
+            * Added the ability to specify the DRS version using the new ``drs_version`` parameter. (e.g., ``drs_version='latest'``).
+            * Parameter names and available filters have been updated to reflect the new backend. 
+
+    .. dropdown:: Migration guide for existing codebases
+        :open:
+        :animate: fade-in-slide-down
+        :color: success
+        :icon: info
+
+        * A guide was written to help users transition to the new version :
+            * See the :doc:`spectroscopy_migration_guide` for more details.
+            * See the official module documentation : :class:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass` for updated docs, code snippets and examples.
+
+.. dropdown:: 2.0.0
+
     * **Summary**
         * Version 2.0.0 introduces breaking changes as it transitions to a new backend for TESS and CHEOPS.
         * The CHEOPS download module has been reworked, as such, some functions are now deprecated.
         * The Sun webapp download functionality has been reworked (to be the same as the CHEOPS module).
-        * The OpenData module has been phased out in favor of a new DOI module that will be released in the future.
         * Documentation has been fully reworked
 
     * **General changes**
