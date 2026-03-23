@@ -33,13 +33,16 @@ Changes in :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.query_
 ######################################################################################################
 The :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.query_database` method is now returns a list of **raw frames**.
 This exhibits the same behavior as on the spectroscopy database on DACE : https://dace.unige.ch/spectroscopyDatabase/
-As such, almost all parameters have changed as they now refer to the raw frame level instead of the timeseries level.
+As such, a lot of parameters have changed.
+
+This is a big departure from the previous version, where the :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.query_database` method returned a list of available points per instrument and per DRS version.
+Now the returned list of raw frames are independant of DRS and simply represent an observation of a given target with a given instrument at a given time.
+The :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.download` or :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.browse_products` methods can be used to download or preview the files associated with a given raw frame for various DRS versions.
 
 One key difference is that ``target_name`` is resolved automatically using SIMBAD. If a target is unable to be resolved this way, this method will still return results that match the exact target name specified in the raw frame's .fits header.
 
-This is a big departure from the previous version, where the :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.query_database` method returned a list of available points per instrument and per DRS version.
+This was done to simplify the query process and handling of multiple DRS versions and post-processings.
 
-This was done to simplify the query process.
 For example if you want to find all the raw frames available for the target ``HD69830`` and the instrument ``HARPS`` you may do :
 
 .. code-block:: python
@@ -80,7 +83,7 @@ Handling DRS versions
 You can now specify the DRS version of the data you want to download using the new ``drs_version`` parameter 
 in both :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.download` and :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.browse_products` methods.
 
-You may use ``drs_version='latest'`` to get the timeseries for the latest DRS version available for each instrument.
+You may use ``drs_version='latest'`` to get reduced products from the latest DRS version available for each instrument.
 
 Or you can specify a specific DRS version (e.g. ``drs_version='DRS-3.3.10'``).
 
