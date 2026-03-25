@@ -118,6 +118,11 @@ Quickstart
 
 For more examples of uses, such as **filtering bad quality data** (see Usage examples)
 
+Documentation
+*************
+
+The official documentation for the ``dace-query`` package is available on `Read the Docs <https://dace-query.readthedocs.io/en/latest/>`_.
+
 Contact
 *******
 
