@@ -27,14 +27,12 @@
 .. ``th_ar``	``cal_thar_lamp_offset_ar``	ThAr Lamp Offset
 .. ``th_ar1``	``cal_thar_lamp_offset_ar1``	ThAr Lamp Offset 1
 .. ``th_ar2``	``cal_thar_lamp_offset_ar2``	ThAr Lamp Offset 2
-.. ``drs_version``	``None``	The DRS version string, removed. As we introduce a new way to filter DRS versions with the ``drs_version`` parameter of ``get_timeseries``, the old string parameter is removed. See detailed explaination below.
-
-
+.. ``drs_version``	``<removed>``	Replaced by separate fields (major, minor, patch, extraction method) for easier filtering and sorting.
 .. ``<none>``	``drs_id``	Used internally by DACE, Unique identifier of a given DRS version
-.. ``<none>``	``rv_extraction_method``	Method used by the DRS for radial velocity extraction (for example ``CCF`` for standard DRS or the name of a post-processing e.g. ``SBART``
-.. ``<none>``	``version_major``	Major version of the DRS software used to obtain this point
-.. ``<none>``	``version_minor``	Minor version of the DRS software used to obtain this point
-.. ``<none>``	``version_patch``	Patch version of the DRS software used to obtain this point
+.. ``<none>``	``rv_extraction_method``	Method used by the DRS for radial velocity extraction (e.g. ``CCF`` or ``LBL``)
+.. ``<none>``	``version_major``	Major version of the DRS software
+.. ``<none>``	``version_minor``	Minor version of the DRS software
+.. ``<none>``	``version_patch``	Patch version of the DRS software
 
 +---------------------+------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Old name            | New name                     | Description                                                                                                                                                                                                                                                           |
@@ -91,5 +89,15 @@
 +---------------------+------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``th_ar2``          | ``cal_thar_lamp_offset_ar2`` | ThAr Lamp Offset 2                                                                                                                                                                                                                                                    |
 +---------------------+------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``drs_version``     | ``None``                     | The DRS version string, removed. As we introduce a new way to filter DRS versions with the ``drs_version`` parameter of ``get_timeseries``, the old string parameter is removed. See detailed explaination below.                                                     |
+| ``drs_version``     | ``<removed>``                | Replaced by separate fields (`major`, `minor`, `patch`, `extraction method`) for easier filtering and sorting.                                                                                                                                                        |
++---------------------+------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``<none>``          | ``drs_id``                   | Used internally by DACE, Unique identifier of a given DRS version.                                                                                                                                                                                                    |
++---------------------+------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``<none>``          | ``rv_extraction_method``     | Method used by the DRS for radial velocity extraction (e.g. ``CCF`` or ``LBL``).                                                                                                                                                                                      |
++---------------------+------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``<none>``          | ``version_major``            | Major version of the DRS software.                                                                                                                                                                                                                                    |
++---------------------+------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``<none>``          | ``version_minor``            | Minor version of the DRS software.                                                                                                                                                                                                                                    |
++---------------------+------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``<none>``          | ``version_patch``            | Patch version of the DRS software.                                                                                                                                                                                                                                    |
 +---------------------+------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+

@@ -29,21 +29,55 @@ During this transition period we will keep ingesting instrument data into both b
 
     If you need assistance with the migration, please do not hesitate to reach out to us at `dace-support@unige.ch <mailto:dace-support@unige.ch>`_.
 
+Changes in DRS Format
+######################################################################################################
+
+New format :
+************
+
+The new backend standardizes all DRS versions into the following format:
+
+``DRS-X.Y.Z-METHOD`` 
+
+* ``X.Y.Z``: Major, minor, and patch versions.
+* ``METHOD``: Name of the DRS or post-process used.
+
+.. dropdown:: Examples 
+    :open:
+    :animate: fade-in-slide-down
+    :color: info
+    :icon: info
+
+    * ``DRS-3.3.10-CCF``: Standard processing extracting radial velocities from the CCF.
+    * ``DRS-3.3.10-LBL``: Line-By-Line post-process using products from DRS-3.3.10.
+
+Legacy formats :
+****************
+
+Previously, inconsistent formats (e.g., ``DRS-3.5`` vs ``DRS-3.3.10``) complicated sorting and filtering. Older versions are now renamed to match the new standard:
+
+``D̶R̶S̶-̶3̶.̶5̶ → DRS-0.3.5-CCF``
+
+Usage in the API :
+******************
+
+Internally, version strings are split into four fields for robust sorting: ``drs_major``, ``drs_minor``, ``drs_patch``, and ``rv_extraction_method``.
+
+You can simply pass the full string (e.g., ``DRS-3.3.10-CCF``) or ``latest`` to the ``drs_version`` parameter. The API automatically parses it to handle the underlying filtering.
+
 Changes in :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.query_database`
 ######################################################################################################
-The :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.query_database` method is now returns a list of **raw frames**.
-This exhibits the same behavior as on the spectroscopy database on DACE : https://dace.unige.ch/spectroscopyDatabase/
-As such, a lot of parameters have changed.
 
-This is a big departure from the previous version, where the :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.query_database` method returned a list of available points per instrument and per DRS version.
-Now the returned list of raw frames are independant of DRS and simply represent an observation of a given target with a given instrument at a given time.
-The :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.download` or :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.browse_products` methods can be used to download or preview the files associated with a given raw frame for various DRS versions.
+The :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.query_database` method now returns a list of **raw frames** (observations), matching the behavior of the `DACE spectroscopy database <https://dace.unige.ch/spectroscopyDatabase/>`_. 
 
-One key difference is that ``target_name`` is resolved automatically using SIMBAD. If a target is unable to be resolved this way, this method will still return results that match the exact target name specified in the raw frame's .fits header.
+Unlike previous versions, which returned available points per instrument and DRS version, raw frames are now independent of the DRS. They represent a single observation of a target with a given instrument at a specific time.
 
-This was done to simplify the query process and handling of multiple DRS versions and post-processings.
+Key updates:
 
-For example if you want to find all the raw frames available for the target ``HD69830`` and the instrument ``HARPS`` you may do :
+* **Automatic name resolution:** ``target_name`` is automatically resolved using SIMBAD. If resolution fails, it matches the exact target name in the raw frame's ``.fits`` header.
+* **Calibration frames:** These are now included by default and can be filtered using ``dpr_catg='CALIB'`` or ``dpr_catg='SCIENCE'``.
+
+Example query for raw frames (observations) of ``HD69830`` with ``HARPS``:
 
 .. code-block:: python
 
@@ -55,10 +89,7 @@ For example if you want to find all the raw frames available for the target ``HD
     }
     raw_frames = Spectroscopy.query_database(filters=filters)
 
-Which will fetch a list of raw frames (observations) matching the specified filters.
-Note that calibration frames are now included in the query results, and can be filtered using the ``dpr_catg='CALIB'`` or ``dpr_catg='SCIENCE'`` in the query results.
-
-You can use this list of raw frames to then identify specific points in :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.get_timeseries` or specific files to download in :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.download` or :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.browse_products`.
+These raw frames can be used to identify points in :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.get_timeseries` or preview/download specific files via :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.download` or :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.browse_products`.
 
 .. dropdown:: Read more about :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.query_database`
     :open:
@@ -76,7 +107,9 @@ With version ``3.0.0`` we have reworked the download functionalities of the Spec
 The old  :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.download_files` is now deprecated in favor of :
 
 * :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.browse_products` to preview files for a given observation
-* :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.download` to download the files of your choice in a single step.
+* :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.download` to download the files of your choice
+
+Both of these methods accept the same filters as :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.query_database`
 
 Handling DRS versions
 *******************************
@@ -99,33 +132,20 @@ Or you can specify a specific DRS version (e.g. ``drs_version='DRS-3.3.10'``).
 Changes in :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.get_timeseries`
 ######################################################################################################
 
+Radial Velocity Sources
+***********************
 
-Handling various radial velocity sources (e.g. ``PUBLICATIONS``, ``SKY_SUBTRACTED`` or ``TELLURIC_CORRECTED`` etc.)
-******************************************************************************************************************************
-
-You may now specify query data coming from various radial velocity sources using the new ``rv_source`` parameter in the :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.get_timeseries` method.
-
-This allows you, for example, to access the telluric corrected radial velocities for NIRPS data :
+Use the new ``rv_source`` parameter to select data from specific processing pipelines (e.g., ``PUBLICATIONS``, ``SKY_SUBTRACTED``, ``TELLURIC_CORRECTED``). By default, it returns both ``STANDARD_PROCESSING`` and ``PUBLICATION`` data.
 
 .. code-block:: python
 
     from dace_query.spectroscopy import Spectroscopy, Source
     
-    # Get timeseries for the latest DRS version available per instrument
-    timeseries = Spectroscopy.get_timeseries(target='HD69830', rv_source=Source.TELLURIC_CORRECTED)
+    # Access telluric corrected RVs (e.g., for NIRPS)
+    ts_telluric = Spectroscopy.get_timeseries(target='HD69830', rv_source=Source.TELLURIC_CORRECTED)
 
-
-Or for example if you want to exclude publication data from your query results :
-
-.. code-block:: python
-
-    from dace_query.spectroscopy import Spectroscopy, Source
-    
-    # Get timeseries for the latest DRS version available per instrument
-    timeseries = Spectroscopy.get_timeseries(target='HD69830', rv_source=Source.STANDARD_PROCESSING)
-
-
-By default, the ``rv_source`` parameter is set to ``STANDARD_PROCESSING`` and ``PUBLICATION`` which will return results from both the standard DRS and from scientific publications.
+    # Exclude publication data by asking for only standard processing
+    ts_standard = Spectroscopy.get_timeseries(target='HD69830', rv_source=Source.STANDARD_PROCESSING)
 
 .. dropdown:: Read more about radial velocity sources
     :open:
@@ -136,33 +156,27 @@ By default, the ``rv_source`` parameter is set to ``STANDARD_PROCESSING`` and ``
     Please see the :class:`~dace_query.spectroscopy.spectroscopy.Source` enum for a complete list of available radial velocity sources.
 
 Handling DRS versions
-*******************************
-You can now specify the DRS version of the data you want to access using the new ``drs_version`` parameter in the :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.get_timeseries` method. 
+*********************
 
-You may use ``drs_version='latest'`` to get the timeseries for the latest DRS version available for each instrument.
-
-Or you can specify a specific DRS version (e.g. ``drs_version='DRS-3.3.10'``). Note that it is recommended to specify an explicit instrument in that case to avoid ambiguity between instrument's DRS versions.
-
+Specify the DRS version via the ``drs_version`` parameter. Use ``latest`` for the most recent standard pipeline, or an exact string. When specifying an exact version, providing an explicit instrument prevents ambiguity.
 
 .. code-block:: python
 
     from dace_query.spectroscopy import Spectroscopy
     
-    # Get timeseries for the latest DRS version available per instrument
-    timeseries = Spectroscopy.get_timeseries(target='HD69830', drs_version='latest')
+    # Latest DRS version per instrument
+    ts_latest = Spectroscopy.get_timeseries(target='HD69830', drs_version='latest')
     
-    # Ge timeseries for a specific DRS version (e.g. DRS-3.3.10)
-    timeseries = Spectroscopy.get_timeseries(target='HD69830', drs_version='DRS-3.3.10')
+    # Specific DRS version
+    ts_specific = Spectroscopy.get_timeseries(target='HD69830', drs_version='DRS-3.3.10')
 
-
-.. dropdown:: Read more about radial velocity sources
+.. dropdown:: Read more about DRS versions
     :open:
     :animate: fade-in-slide-down
     :color: info
     :icon: info
 
     Please see the :meth:`~dace_query.spectroscopy.spectroscopy.SpectroscopyClass.get_timeseries` documentation for more details about the available options for the ``drs_version`` parameter.
-
 
 Changes in parameters
 **********************
