@@ -353,6 +353,8 @@ class DaceClass:
         status_code = err_h.response.status_code
         if status_code == 404:
             self.log.error('No data found.')
+        elif status_code == 400:
+            self.log.error('Bad request. Please check your query parameters or filters.')
         elif status_code == 401:
             self.log.error('Not authorized. You need to be logged on to access these data.')
         elif status_code == 403:
@@ -374,10 +376,27 @@ class DaceClass:
 
     @staticmethod
     def order_spectroscopy_data_by_instruments(data: dict[str, np.ndarray]) -> dict:
-        """Internal stuff"""
-        instruments_names = data.pop('ins_name', None)
+        if data is None or len(data) == 0:
+            return {}    
+    
+        instruments_names = data.pop('instrument_name', None)
         instruments_modes = data.pop('ins_mode', None)
-        drs_versions = data.pop('drs_version', None)
+        
+        # There are three arrays with version_major, version_minor, version_patch and rv_extraction_method (DRS-{major}.{minor}.{patch}-{method})
+        # Build DRS version strings from related arrays if they all exist.
+        if all(k in data for k in ('version_major', 'version_minor', 'version_patch', 'rv_extraction_method')):
+            drs_versions = [
+                f"DRS-{major}.{minor}.{patch}-{method}"
+                for major, minor, patch, method in zip(
+                    data['version_major'],
+                    data['version_minor'],
+                    data['version_patch'],
+                    data['rv_extraction_method'],
+                )
+            ]
+        else:
+            drs_versions = None
+        
         bib_codes = data.pop('pub_bibcode', None)
 
         data_by_instrument = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(list))))

@@ -1,1 +1,1 @@
-from dace_query.spectroscopy.spectroscopy import Spectroscopy, SpectroscopyClass
+from dace_query.spectroscopy.spectroscopy import Spectroscopy, SpectroscopyClass, Source

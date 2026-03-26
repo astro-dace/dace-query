@@ -16,7 +16,7 @@ The dace-query package is available on PyPi and can be installed using `pip <htt
     # Install using pip
     pip install dace-query
 
-    # Make sure you have the latest version of the DACE API: (version 1.1.0)
+    # Make sure you have the latest version of the DACE API
     pip show dace-query
     
     # Update using pip
@@ -27,7 +27,7 @@ The dace-query package is available on PyPi and can be installed using `pip <htt
     # Using conda
     conda install -c conda-forge dace-query
 
-    # Make sure you have the latest version of the DACE API: (version 1.1.0)
+    # Make sure you have the latest version of the DACE API
     conda list dace-query
 
     # Upgrade de DACE APIs
@@ -117,6 +117,11 @@ Quickstart
 
 
 For more examples of uses, such as **filtering bad quality data** (see Usage examples)
+
+Documentation
+*************
+
+The official documentation for the ``dace-query`` package is available on `Read the Docs <https://dace-query.readthedocs.io/en/latest/>`_.
 
 Contact
 *******

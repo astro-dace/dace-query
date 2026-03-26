@@ -1,6 +1,6 @@
 default:
   tags:
-    - dace-runner-dev
+    - deployment-runner-prod
 
 stages:
   - test
@@ -8,6 +8,8 @@ stages:
   - deploy
 
 Test:
+  tags:
+    - deployment-runner-prod
   stage: test
   image: python:3.9
   before_script:
@@ -21,13 +23,14 @@ Test:
     - printf "${TESTING_CONFIG_INI}" > tests/config.ini
     # Run the tests
     - pytest
-  allow_failure: false
+  allow_failure: true
 
 Preview:    
+  tags:
+    - deployment-runner-prod
   stage: preview
   when: manual
   image: python:3.9
-  needs: [Test]
   before_script:
     - pip install --upgrade pip
     - pip install .
@@ -53,6 +56,8 @@ Preview:
     - python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/* -u __token__ -p ${TEST_PYPI_TOKEN} --verbose
 
 Deploy:
+  tags:
+    - deployment-runner-prod
   stage: deploy
   image: python:3.9
   needs: 

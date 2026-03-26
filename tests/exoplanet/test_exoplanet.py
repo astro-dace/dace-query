@@ -19,6 +19,7 @@ def test_exoplanets_query_database_keys(instance, request):
         'planet_radius',
         'planet_mass_rel_err',
         'planet_radius_rel_err',
+        'host_name',
         'planet_letter',
         'tic_id',
         'gaia_dr3_id',
@@ -26,7 +27,6 @@ def test_exoplanets_query_database_keys(instance, request):
         'discovery_method',
         'discovery_facility',
         'discovery_locale',
-        'number_stars',
         'number_planets',
         'ads_link',
         'last_updated',
@@ -159,6 +159,25 @@ def test_exoplanets_query_database_keys(instance, request):
         'equilibrium_temp_computed_lower',
         'transmission_spectroscopy_metric',
         'emission_spectroscopy_metric',
+        'binary_projected_separation',
+        'binary_angular_seperation_computed',
+        'companion_gaia_dr3_id',
+        'companion_g_mag',
+        'companion_gmag_host',
+        'companion_gbp_grp',
+        'companion_teff_gaia_dr3',
+        'companion_teff_gaia_dr3_upper',
+        'companion_teff_gaia_dr3_lower',
+        'companion_feh_gaia_dr3',
+        'companion_feh_gaia_dr3_upper',
+        'companion_feh_gaia_dr3_lower',
+        'companion_stellar_luminosity_gaia_dr3',
+        'companion_stellar_luminosity_gaia_dr3_upper',
+        'companion_stellar_luminosity_gaia_dr3_lower',
+        'companion_logg_gaia_dr3',
+        'companion_logg_gaia_dr3_upper',
+        'companion_logg_gaia_dr3_lower',
+        'number_stellar_companion',
     ]
 
     assert all(key in results.keys() for key in expected_keys)
@@ -178,7 +197,7 @@ def test_exoplanet_query_database_specific_targets(
     dace_instance: DaceClass = request.getfixturevalue(instance)
     instance = ExoplanetClass(dace_instance=dace_instance)
 
-    filters: dict = {"obj_id_catname": {"equal": [target]}}
+    filters: dict = {"planet_name": {"equal": [target]}}
     results = instance.query_database(filters=filters, limit=10, output_format="dict")
     assert results
-    assert all((target == obj) for obj in results["obj_id_catname"])
+    assert all((target == obj) for obj in results["planet_name"])
