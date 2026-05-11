@@ -1,13 +1,21 @@
 Changelogs
 #################
 
+.. dropdown:: 3.0.1 ``hotfix``
+    :open:
+    :animate: fade-in-slide-down
+    :color: info
+    :icon: bug
+
+    * **Summary**
+        * Fix a bug in the Spectroscopy module where the "LBL" radial velocity source was incorrectly set as ``LBL`` instead of ``LBL_A``.
+
 
 .. dropdown:: 3.0.0 ``current``
     :open:
     :animate: fade-in-slide-down
     :color: info
     :icon: sparkle-fill
-
 
     * **Summary**
         * Version 3.0.0 introduces breaking changes as it transitions to a new backend for Spectroscopy.

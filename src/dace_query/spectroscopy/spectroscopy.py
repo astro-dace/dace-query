@@ -89,7 +89,7 @@ class Source(Enum):
     TELLURIC_CORRECTION = "POSTDRS_TELL_CORR_A"
     SKYSUB = "POSTDRS_SKYSUB_A"
     SBART = "SBART"
-    LBL = "LBL"
+    LBL = "LBL_A"
     PUBLICATION = "PUB"
 
 class SpectroscopyClass:    
