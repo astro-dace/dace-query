@@ -296,18 +296,18 @@ class CheopsClass:
         if sort is None:
             sort = {}
 
-        # a = 'photometry/' + target + '?aperture=' + aperture + '&filters=' +
-        # self.dace.transform_dict_to_encoded_json(filters) + '&sort=' + self.dace.transform_dict_to_encoded_json(sort)
+        json_data = {
+            'aperture': str(aperture),
+            'filters': json.dumps(filters),
+            'sort': json.dumps(sort)
+        }
 
         return self.dace.transform_to_format(
-            self.dace.request_get(
+            self.dace.request_post(
                 api_name=self.__CHEOPS_API,
                 endpoint=f'photometry/{target}',
-                params={
-                    'aperture': str(aperture),
-                    'filters': json.dumps(filters),
-                    'sort': json.dumps(sort)
-                }), output_format=output_format
+                json_data=json_data,
+            ), output_format=output_format
         )
 
     def download(self,

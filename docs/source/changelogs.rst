@@ -1,6 +1,16 @@
 Changelogs
 #################
 
+.. dropdown:: 3.0.2 ``hotfix``
+    :open:
+    :animate: fade-in-slide-down
+    :color: info
+    :icon: bug
+
+    * **Summary**
+        * Cheops :meth:`~dace_query.cheops.cheops.CheopsClass.get_lightcurve` method now queries backend using `POST` instead of `GET` to avoid issues with long query strings when using multiple filters.
+        * This change is transparent to users and should not require any changes in existing code.
+
 .. dropdown:: 3.0.1 ``hotfix``
     :open:
     :animate: fade-in-slide-down
