@@ -99,6 +99,11 @@ def test_cheops_get_lightcurve(instance, target, request):
     results = instance.get_lightcurve(target, output_format='dict')
     # Results is not empty
     assert results
+    
+    # Test with filters
+    filters = {'file_key': {'contains': ['CH_PR100002_TG016607_V0200']}}
+    results = instance.get_lightcurve(target, filters=filters, output_format='dict')
+    assert results
 
 
 @pytest.mark.parametrize('instance, target, file_key', [
