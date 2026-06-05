@@ -108,7 +108,7 @@ class SpectroscopyClass:
 
     """
     __VALID_FILE_TYPE_ABBREVIATIONS = ['s1d', 's2d', 'ccf', 'all']
-
+    timeout: float | None = None
 
 
     def __init__(self, dace_instance: Optional[DaceClass] = None):
@@ -168,7 +168,8 @@ class SpectroscopyClass:
             endpoint='drs',
             params={
                 'filters': json.dumps(filters_for_drs)
-            }
+            },
+            timeout=self.timeout
         )
         
         return self.dace.transform_to_format(drs, output_format=output_format)
@@ -236,7 +237,8 @@ class SpectroscopyClass:
                     'limit': str(limit),
                     'filters': json.dumps(filters),
                     'sort': json.dumps(sort)
-                }
+                },
+                timeout=self.timeout
             ), output_format=output_format
         )
 
@@ -482,7 +484,8 @@ class SpectroscopyClass:
                 'fileType': corrected_file_type,
                 'filters': filters,
                 'drsIds': drs_ids
-            })
+            }),
+            timeout=self.timeout,
         )
         
         download_id = response.get('key', None)
@@ -869,7 +872,8 @@ class SpectroscopyClass:
                 'limit': str(limit),
                 'filters': json.dumps(filters),
                 'sort': json.dumps(sort)
-            }
+            },
+            timeout=self.timeout
         )
         
         if sorted_by_instrument:
@@ -1052,7 +1056,8 @@ class SpectroscopyClass:
                 'fileType': corrected_file_type,
                 'filters': filters,
                 'drsIds': drs_ids
-                })
+                }),
+            timeout=self.timeout
         )
         return self.dace.transform_to_format(products, output_format=output_format)
 
@@ -1178,7 +1183,8 @@ class SpectroscopyClass:
         response = self.dace.request_get(
             api_name=self.__SPECTROSCOPY_API,
             endpoint=f'guiding/{spectrum_id}',
-            raw_response=True
+            raw_response=True,
+            timeout=self.timeout
         )
         
         if not response:
