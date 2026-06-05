@@ -225,7 +225,8 @@ class DaceClass:
         )
 
     def request_get(self, api_name: str, endpoint: str, params: Optional[dict] = None,
-                    raw_response: Optional[bool] = False) -> Union[bytes, dict]:
+                    raw_response: Optional[bool] = False,
+                    timeout: Optional[float] = None) -> Union[bytes, dict]:
         """Internal stuff"""
 
         """
@@ -237,7 +238,8 @@ class DaceClass:
 
         host = self.__cfg['api'][api_name] + endpoint
         try:
-            response = requests.get(host, headers=headers, params=params)
+            response = requests.get(host, headers=headers, params=params,
+                                    timeout=timeout)
             response.raise_for_status()
 
             if response.ok:
@@ -256,7 +258,8 @@ class DaceClass:
     def request_post(self, api_name: str, endpoint: str,
                      json_data: Optional[dict] = None,
                      data: Optional[str] = None,
-                     params: Optional[dict] = None) -> dict:
+                     params: Optional[dict] = None,
+                     timeout: Optional[float] = None) -> dict:
 
         """Internal stuff"""
 
@@ -264,7 +267,8 @@ class DaceClass:
         host = self.__cfg['api'][api_name] + endpoint
 
         try:
-            response = requests.post(host, headers=headers, json=json_data, data=data, params=params)
+            response = requests.post(host, headers=headers, json=json_data, 
+                                     data=data, params=params, timeout=timeout)
             response.raise_for_status()
             if response.ok:
                 return response.json()
